@@ -19,7 +19,7 @@
     - hwN: 과제N 보고서 및 보고서에 첨부된 이미지
     
 - usecase_diagrams
-    통합된 Usecase Diagram 파일
+    - 통합된 Usecase Diagram 파일
  
 - .gitignore
-    `git commit -am "MESSAGE"` 명령어를 써도 백업과 락 파일들이 스테이징 되지 않게 하기 위한 예외처리
+    - `git commit -am "MESSAGE"` 명령어를 써도 백업과 락 파일들이 스테이징 되지 않게 하기 위한 예외처리
