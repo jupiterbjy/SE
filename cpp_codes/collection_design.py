@@ -128,7 +128,7 @@ class UserCollection:
         return self.total_users
 
 
-class AllUsers:
+class UserManager:
     def __init__(self, company_collection, common_collection):
         self.company_collection = UserCollection()
         self.common_collection = UserCollection()
