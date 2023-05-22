@@ -92,9 +92,9 @@ public:
 		users_[total_users_++] = user;
 	}
 
-	void del_user(string id)
+	void del_user(const string& id)
 	{
-		int user_idx = find_user_idx_by_id(id);
+		const int user_idx = find_user_idx_by_id(id);
 
 		// copy user ref
 		const User* user = users_[user_idx];
@@ -117,29 +117,29 @@ public:
 class UserManager
 {
 private:
-	UserCollection company_collection = UserCollection();
-	UserCollection common_collection = UserCollection();
+	UserCollection company_collection_ = UserCollection();
+	UserCollection common_collection_ = UserCollection();
 
 public:
 	void add_company_user(const string& id, const string& pw, const string& company_name, const string& business_num)
 	{
-		auto new_user = CompanyUser(id, pw, company_name, business_num);
-		company_collection.add_user(&new_user);
+		User* new_user = new CompanyUser(id, pw, company_name, business_num);
+		company_collection_.add_user(new_user);
 	}
 
 	void add_common_user(const string& id, const string& pw, const string& name, const string& ssn)
 	{
-		auto new_user = CommonUser(id, pw, name, ssn);
-		company_collection.add_user(&new_user);
+		User* new_user = new CommonUser(id, pw, name, ssn);
+		company_collection_.add_user(new_user);
 	}
 
 	void delete_user_by_id(const string& id)
 	{
 		// Check if it's in company collection, delete it if so
-		if (company_collection.does_user_exist(id))
-			company_collection.del_user(id);
+		if (company_collection_.does_user_exist(id))
+			company_collection_.del_user(id);
 		else
 			// Otherwise delete in other collection
-			common_collection.del_user(id);
+			common_collection_.del_user(id);
 	}
 };
