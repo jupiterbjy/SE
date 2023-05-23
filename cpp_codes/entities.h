@@ -35,7 +35,7 @@ private:
 	string business_num_;
 
 public:
-	CompanyUser(const string& id, const string& pw, string company_name, string business_num): User(id, pw)
+	CompanyUser(const string& id, const string& pw, string company_name, string business_num) : User(id, pw)
 	{
 		company_name_ = std::move(company_name);
 		business_num_ = std::move(business_num);
@@ -67,7 +67,7 @@ public:
 class UserCollection
 {
 private:
-	User* users_[100] = {nullptr,};
+	User* users_[100] = { nullptr, };
 	int total_users_ = 0;
 
 	int find_user_idx_by_id(const string& id) const
@@ -98,7 +98,7 @@ public:
 
 		// copy user ref
 		const User* user = users_[user_idx];
-		delete &user;
+		delete& user;
 
 		// move user refs to fill in the gap
 		for (int idx = 0; idx < --total_users_; idx++)
@@ -147,6 +147,19 @@ public:
 		User user = *common_collection_.get_user_by_id(id);
 		CommonUser* common_user = (CommonUser*)&user;
 		return common_user;
+	}
+
+	bool is_user_company(const string& id)
+	{
+		// Check if user is company user
+		return company_collection_.does_user_exist(id);
+	}
+
+	bool is_user_common(const string& id)
+	{
+		// Check if user is company user
+		// Now I think we'd better off adding company/common flag in user...
+		return common_collection_.does_user_exist(id);
 	}
 
 	void delete_user_by_id(const string& id)
