@@ -1,14 +1,18 @@
 #pragma once
 
-#include<string>
-#include <utility>
+#include <string>
+#include <fstream>
+#include <iostream>
+using namespace std;
+
+#define INPUT_FILE_NAME "input.txt"
+#define OUTPUT_FILE_NAME "output.txt"
 
 // Unifying style to Google's C++ style For now
 // maybe excluding class name, class name using snake-case doesn't feel right
 // Written with support of Code inspection by ReSharper C++
 
-using namespace std;
-
+/*
 class User
 {
 private:
@@ -172,3 +176,143 @@ public:
 			common_collection_.del_user(id);
 	}
 };
+*/
+
+class Employment
+{
+private:
+    string EcompanyName;
+    string Edeadline;
+    string Ework;
+    int peopleNumber;
+public:
+    Employment(string companyName, string deadline, string work){
+        EcompanyName = companyName;
+        Edeadline = deadline;
+        Ework = work;
+        peopleNumber = 0;
+    }
+	
+    string getCompanyName(){
+        return this->EcompanyName;
+    }
+    string getDeadline(){
+        return this->Edeadline;
+    }
+    string getWork(){
+        return this->Ework;
+    }
+/*
+    void getEmployment();// [업무] [인원 수] [신청 마감일]
+    void getEmploymentDetails(); //<- 이제 필요없을 것 같음(삭제필)
+    void addEmployment(); //[업무] [인원 수] [신청 마감일]
+    void updateEmployment();
+    void deleteEmployment();
+    void getClosedEmployment();
+    void getClosingEmployment();
+*/
+};
+
+class EmploymentCollection
+{
+private:
+    static Employment* employmentList[50];
+    static int numEmployments;
+public:
+    static Employment* getEmployment(int index){
+        return employmentList[index];
+    }
+    static void addEmployment(const string& companyName, const string& deadline, const string& work){
+        Employment new_employment = Employment(companyName, deadline, work);
+        employmentList[numEmployments] = &new_employment;
+        numEmployments++;
+    }
+    static int staticsEmployment(){
+        return numEmployments;
+    }
+};
+
+//채용 정보 등록(3.1)
+//[업무] [인원 수] [신청 마감일]
+class EmploymentAdd;
+class EmploymentAddUI{
+private:
+    EmploymentAdd * employmentAdd;
+public:
+//show First 함수 사라짐.
+    string addEmployment(){
+        string returnString="";
+        getline(cin, returnString);
+        return returnString;
+    }
+};
+class EmploymentAdd{
+private:
+    EmploymentAddUI * employmentAddUI;
+    EmploymentCollection * employmentCollection;
+public:
+    void addEmployment(){
+        string returnString = employmentAddUI->addEmployment();
+		cout << returnString << endl;
+	}
+};
+
+//등록된 채용 정보 리스트 조회 (3.2)
+//[회사이름] [사업자번호] [업무] [인원 수] [신청마감일]
+class ShowEmploymentList;
+class ShowEmploymentListUI{
+private:
+    ShowEmploymentList *showEmploymentList;
+public:
+    void showEmploymentListFunction(Employment* employment){
+		ofstream ofs(OUTPUT_FILE_NAME);
+        ofs << employment->getCompanyName() << employment->getWork() << employment->getDeadline() << endl;
+        return;
+    }
+};
+class ShowEmploymentList{
+private:
+    ShowEmploymentListUI* showEmploymentListUI;
+    EmploymentCollection* employmentCollection;
+public:
+    void showEmploymentInfo(){
+        int index = 0;
+		//int형 선언함
+        Employment* employment = employmentCollection->getEmployment(index);
+        while(employment!=NULL){
+            showEmploymentListUI->showEmploymentListFunction(employment);
+            index++;
+            employment = employmentCollection->getEmployment(index);     
+			//  if 사용자랑 == 현재 유저가 같으면 
+			//	지금 조건이 맞는지 검사 후 int 자료형 하나 선언해둔거++  
+        }
+		// UI에 출력 요청을 보냄
+		return;
+    }
+};
+// istringstream은 istream을 상속받으므로 getline을 사용할 수 있다.
+	/*
+    while (getline(returnString, buffer, Delimiter)) {
+        result.push_back(buffer);               // 절삭된 문자열을 vector에 저장
+    }
+        vector<string> result = split(returnString, ' ');
+        employmentCollection.addEmployment(result[0],result[1],result[2]);
+    }
+};
+//회사 이름 검색(4.1)
+class CompanyNameSearch;
+class CompanyNameSearchUI{
+private:
+    CompanyNameSearch companyNameSearch;
+public:
+    //void startInterface(); 삭제해야할수도?
+    void searchCompanyName();
+};
+
+class CompanyNameSearch
+{
+private:
+    EmploymentCollection employmentCollection;
+public:
+};
+*/

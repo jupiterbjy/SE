@@ -1,3 +1,5 @@
+/*
+
 #pragma once
 
 #include <iostream>
@@ -114,6 +116,7 @@ public:
 // Boundary Class
 class LoginUI
 {
+<<<<<<< HEAD
 private:
 	LoginManager control;
 
@@ -197,3 +200,8 @@ public:
 		cout << "> " << loginUser->get_id() << endl;
 	}
 };
+=======
+	
+};
+*/
+>>>>>>> a04137e (Add: Create 3.1 3.2 test)
