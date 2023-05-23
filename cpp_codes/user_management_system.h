@@ -36,6 +36,7 @@ public:
 
 	void start_interface(string id, string pw, string name, string ssn)
 	{
+		cout << "1.1. 회원가입" << endl;
 		control.add_user(id, pw, name, ssn);
 		cout << "> " << name << " " << ssn << " " << id << " " << pw << endl;
 	}
@@ -69,6 +70,7 @@ public:
 
 	void start_interface(string id, string pw, string company_name, string business_num)
 	{
+		cout << "1.1. 회원가입" << endl;
 		control.add_user(id, pw, company_name, business_num);
 		cout << "> " << company_name << " " << business_num << " " << id << " " << pw << endl;
 	}
@@ -120,6 +122,7 @@ public:
 
 	User* start_interface(const string& id, const string& pw)
 	{
+		cout << "2.1. 로그인" << endl;
 		User* user = control.login(id, pw);
 		cout << "> " << id << " " << pw << endl;
 
@@ -158,6 +161,7 @@ public:
 
 	void start_interface(const string& id)
 	{
+		cout << "2.2. 로그아웃" << endl;
 		control.logout(id);
 		cout << "> " << id << endl;
 	}
@@ -176,7 +180,7 @@ public:
 	{
 		manager.delete_user_by_id(loginUser->get_id());
 	}
-}
+};
 
 // boundary(회원 탈퇴)
 class UserWithdrawalUI
@@ -192,4 +196,4 @@ public:
 		control.withdrawalUser(loginUser);
 		cout << "> " << loginUser->get_id() << endl;
 	}
-}
+};
