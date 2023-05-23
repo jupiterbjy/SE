@@ -133,6 +133,22 @@ public:
 		company_collection_.add_user(new_user);
 	}
 
+	CompanyUser* get_company_user(const string& id)
+	{
+		// Downcast to CompanyUser
+		User user = *company_collection_.get_user_by_id(id);
+		CompanyUser* company_user = (CompanyUser*)&user;
+		return company_user;
+	}
+
+	CommonUser* get_common_user(const string& id)
+	{
+		// Downcast to CommonUser
+		User user = *common_collection_.get_user_by_id(id);
+		CommonUser* common_user = (CommonUser*)&user;
+		return common_user;
+	}
+
 	void delete_user_by_id(const string& id)
 	{
 		// Check if it's in company collection, delete it if so
