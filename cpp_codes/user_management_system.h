@@ -8,6 +8,7 @@
 using namespace std;
 
 
+// Control Class
 class AddNewCommonUser
 {
 private:
@@ -25,6 +26,7 @@ public:
 	}
 };
 
+// Boundary Class
 class AddCommonUserUI {
 private:
 	AddNewCommonUser control;
@@ -39,7 +41,7 @@ public:
 	}
 };
 
-
+// Control Class
 class AddNewCompanyUser
 {
 private:
@@ -57,7 +59,7 @@ public:
 	}
 };
 
-
+// Boundary Class
 class AddCompanyUserUI {
 private:
 	AddNewCompanyUser control;
@@ -72,20 +74,93 @@ public:
 	}
 };
 
-
+// Control Class
 class LoginManager
 {
 private:
-	LoginUI ui;
+	UserManager manager;
 
 public:
+	LoginManager(const UserManager& manager)
+	{
+		this->manager = manager;
+	}
 
+	User* login(const string& id, const string& pw)
+	{
+		// Very wanky due to initial User designs
+		// Check if given ID is common user or not
+		if (manager.is_user_common(id))
+		{
+			// if so, get user and check password - Not sure if required
+			// Not factoring in pw verification fail case, as it's undefined
+			User* user = manager.get_common_user(id);
+			if (user->is_pwd_valid(pw))
+				return user;
+		}
+		else
+		{
+			User* user = manager.get_company_user(id);
+			if (user->is_pwd_valid(pw))
+				return user;
+		}
+
+		return nullptr;
+	}
 };
 
-
+// Boundary Class
 class LoginUI
 {
-	
+private:
+	LoginManager control;
+
+public:
+	LoginUI(const UserManager& manager) : control(manager) {}
+
+	User* start_interface(const string& id, const string& pw)
+	{
+		User* user = control.login(id, pw);
+		cout << "> " << id << " " << pw << endl;
+
+		return user;
+	}
+};
+
+// Control Class
+class LogoutManager
+{
+private:
+	UserManager manager;
+
+public:
+	LogoutManager(const UserManager& manager)
+	{
+		this->manager = manager;
+	}
+
+	void logout(const string& id)
+	{
+		// Due to design change, this method got nothing to do
+		// This feels VERY wrong
+		return;
+	}
+};
+
+// Boundary Class
+class LogoutUI
+{
+private:
+	LogoutManager control;
+
+public:
+	LogoutUI(const UserManager& manager) : control(manager) {}
+
+	void start_interface(const string& id)
+	{
+		control.logout(id);
+		cout << "> " << id << endl;
+	}
 };
 
 // control(회원 탈퇴)
