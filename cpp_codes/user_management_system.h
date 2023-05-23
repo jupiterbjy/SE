@@ -87,3 +87,34 @@ class LoginUI
 {
 	
 };
+
+// control(회원 탈퇴)
+class UserWithdrawal {
+private:
+	UserManager manager;
+public:
+	UserWithdrawal(const UserManager& manager) {
+		this->manager = manager;
+	}
+
+	void withdrawalUser(User* loginUser)
+	{
+		manager.delete_user_by_id(loginUser->get_id());
+	}
+}
+
+// boundary(회원 탈퇴)
+class UserWithdrawalUI
+{
+private:
+	UserWithdrawal control;
+public:
+	UserWithdrawalUI(const UserManager& manager) : control(manager) {}
+
+	void startInterface(User* loginUser)
+	{
+		cout << "1.2. 회원탈퇴" << endl;
+		control.withdrawalUser(loginUser);
+		cout << "> " << loginUser->get_id() << endl;
+	}
+}
