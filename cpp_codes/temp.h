@@ -3,10 +3,10 @@
 
 class EmploymentCollection {
 private:
-    Employment* employments[100];
+    Employment* employments[100]; //배열로 채용건수 선언
     int employments_total = 0;
 
-    String* work_types[100];
+    String* work_types[100]; //배열로 업무타입 선언
     int work_types_total = 0;
 
     bool check_if_work_type_exists(string keyword) {
