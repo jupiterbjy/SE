@@ -1,12 +1,10 @@
-// 헤더 선언 
-//#include <stdio.h> 
-//#include <string>
-#include "entities.h"
+#include "employmentEntities.h"
+
+
 
 // 상수 선언
 #define MAX_STRING 32
-#define INPUT_FILE_NAME "input.txt"
-#define OUTPUT_FILE_NAME "output.txt"
+
 
 // 함수 선언
 void doTask();
@@ -16,16 +14,19 @@ void doTask();
 //void program_exit();
 void aaddEmployment();
 void sshowEmploymentList();
+void ccompanyNameSerch();
 
 // 변수 선언
 FILE* in_fp, *out_fp;
 
 int main() 
 {
-    // 파일 입출력을 위한 초기화
+    FILE* in_fp = fopen(INPUT_FILE_NAME, "r+"); 
     FILE* out_fp = fopen(OUTPUT_FILE_NAME, "w+");
-    FILE* in_fp = fopen("input.txt", "r+"); 
+    // 파일 입출력을 위한 초기화
     doTask();
+    //fclose(in_fp);
+    //fclose(out_fp);
     return 0; 
 }
 
@@ -36,12 +37,12 @@ void doTask()
     int is_program_exit = 0;
     //User* loginUser;
     //int loginUserType = 0; // 0: 로그인 회원 없음 1: 회사 회원, 2: 일반 회원
-
     while(!is_program_exit) 
     {
+        cout << "doTask is running" << endl;
         // 입력파일에서 메뉴 숫자 2개를 읽기
-        fscanf(in_fp, "%d %d ", &menu_level_1, &menu_level_2);
-
+        fscanf(in_fp, "%d %d", &menu_level_1, &menu_level_2);
+        cout << "Open File is running" << endl;
         // 메뉴 구분 및 해당 연산 수행 
         switch(menu_level_1)
         {
@@ -83,11 +84,13 @@ void doTask()
                     case 1: // "3.1. 채용 정보 등록"
                     {
                         aaddEmployment();
+                        cout << "3.1 Now Running" << endl;
                         break;
                     }
                     case 2:
                     {
                         sshowEmploymentList();
+                        cout << "3.2 Now Running" << endl;
                         break;
                     }
                 }
@@ -98,6 +101,8 @@ void doTask()
                 {
                     case 1:
                     {
+                        ccompanyNameSerch();
+                        cout << "4.1 Now Running" << endl;
                         break;
                     }
                     case 2:
@@ -129,7 +134,7 @@ void doTask()
             {
                 switch(menu_level_2) 
                 {
-                    case 1: // "6.1. 종료“ 메뉴 부분 
+                    case 1: // "6.1. 종료“ 메뉴 부gi분 
                     {
                         //program_exit(); 
                         //is_program_exit = 1; 
@@ -150,4 +155,10 @@ void aaddEmployment() {
 void sshowEmploymentList() {
    ShowEmploymentList showEmploymentList;
    showEmploymentList.showEmploymentInfo();
+}
+
+void ccompanyNameSerch(){
+    
+    CompanyNameSearch companyNameSearch;
+    companyNameSearch.searchCompanyName();
 }
