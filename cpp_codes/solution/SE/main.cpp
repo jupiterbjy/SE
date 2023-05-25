@@ -69,8 +69,8 @@ void doTask(ifstream& in_fp, ofstream& out_fp)
     CompanyNameSearchUI company_search_ui(&employment_collection);
 
     // statistics system
-    ApplicationStatUI application_stat_ui(&application_collection);
-    EmploymentStatUI employment_stat_ui(&employment_collection);
+    ApplicationStatUI application_stat_ui(&employment_collection, &application_collection);
+    EmploymentStatUI employment_stat_ui(&employment_collection, &application_collection);
 
     // Application Management system
     NowApplicationUI apply_now_ui(&application_collection, &employment_collection);
