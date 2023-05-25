@@ -173,6 +173,83 @@ public:
 };
 
 
+class Employment;
+class EmploymentCollection;
+class Application
+{
+private:
+	const string user_id_;
+	string businessNum_;
+	string work_type_;
+
+public:
+	Application(const string user_id, const string businessNum, const string work_type)
+		: user_id_(user_id),
+		businessNum_(businessNum),
+		work_type_(work_type)
+	{};
+
+	string get_user_id() { return user_id_; }
+	Employment* get_employment() { return EmploymentCollection::getEmploymentByBussinessNum(businessNum_); }
+	string get_company_name() { return EmploymentCollection::getEmploymentByBussinessNum(businessNum_)->getCompanyName(); }
+	string get_business_number() { return EmploymentCollection::getEmploymentByBussinessNum(businessNum_)->getBusinessNumber(); }
+	string get_dead_line() { return EmploymentCollection::getEmploymentByBussinessNum(businessNum_)->getDeadline(); }
+	int get_people_number() { return EmploymentCollection::getEmploymentByBussinessNum(businessNum_)->getPeopleNumber(); }
+	string get_work_type() { return work_type_; }
+};
+
+
+class ApplicationCollection {
+private:
+	Application* applications[100];
+	Employment* employment_;
+	int applicationTotal = 0;
+
+public:
+
+	ApplicationCollection(Employment* employment) : employment_(employment) {}
+
+	int totalCount() { return applicationTotal; } // 합계 카운터
+
+
+	void add_application(Application* application) { // 노예지원서 추가하기
+		//if (applicationTotal >= 100) return RETURN_ERROR;  //예외처리의 흔적
+		applications[applicationTotal++] = application; // 지원서 합계
+		//return RETURN_OK;  //예외처리의 흔적
+	}
+
+	void cancel_application(int idx) { // 마감안했으면 지원취소 가능
+		//if (idx >= applicationTotal) return RETURN_ERROR;  //예외처리의 흔적
+		delete applications[idx];
+		for (int i = idx + 1; i < applicationTotal; ++i)
+		{
+			applications[i - 1] = std::move(applications[i]);
+		}
+		--applicationTotal;
+		//return RETURN_OK;  //예외처리의 흔적
+	}
+
+	//지원서 가져오기 중 필요 없는 것 찾아서 지워야 함
+	Application& get_application_by_index(int idx) { //인덱스로 지원서 뽀려오기
+		return *applications[idx];
+	}
+
+	Application* get_application_by_user_id(string user_id) { //유저아이디로 지원서 뽀려오기
+		for (Application* app : applications)
+			if (app->get_user_id() == user_id)
+				return app;
+		return nullptr;
+	}
+
+	int get_index_by_user_id(string user_id) { //유저아이디로 지원서 번호 가져오기
+		for (int i = 0; i < applicationTotal; ++i)
+			if (applications[i]->get_user_id() == user_id)
+				return i;
+		return -1;
+	}
+};
+
+
 class Employment
 {
 private:
@@ -180,12 +257,16 @@ private:
 	string deadline;
 	string work;
 	int peopleNumber;
+	string businessNum;
+	ApplicationCollection* applicationCollection;
 public:
-	Employment(string companyName, string deadline, string work) {
+	Employment(string companyName, string deadline, string work, string businessNum) {
 		this->companyName = companyName;
 		this->deadline = deadline;
 		this->work = work;
 		this->peopleNumber = 0;
+		this->businessNum = businessNum;
+		this->applicationCollection = new ApplicationCollection(this);
 	}
 
 	string getCompanyName() {
@@ -199,6 +280,12 @@ public:
 	}
 	int getPeopleNumber() {
 		return this->peopleNumber;
+	}
+	string getBusinessNumber() {
+		return this->businessNum;
+	}
+	ApplicationCollection* getApplicationCollection() {
+		return this->applicationCollection;
 	}
 	/*
 		void getEmployment();// [업무] [인원 수] [신청 마감일]
@@ -220,10 +307,10 @@ public:
 		return employmentList[index];
 	}
 
-	static void addEmployment(const string& companyName, const string& deadline, const string& work) {
-		Employment new_employment = Employment(companyName, deadline, work);
+	static void addEmployment(const string& companyName, const string& deadline, const string& work, const string bussinessNum) {
+		Employment* new_employment = new Employment(companyName, deadline, work, bussinessNum);
 
-		employmentList[numEmployments] = &new_employment;
+		employmentList[numEmployments] = new_employment;
 		numEmployments++;
 	}
 
@@ -246,69 +333,28 @@ public:
 	static int getPeopleNumber(int index) {
 		return employmentList[index]->getPeopleNumber();
 	}
+
+	static string getBusinessNumber(int index) {
+		return employmentList[index]->getBusinessNumber();
+	}
+
+	static Employment* getEmploymentByIndex(int index)
+	{
+		return employmentList[index];
+	}
+	static Employment* getEmploymentByBussinessNum(string bussinessNum)
+	{
+		for (int i = 0; i < numEmployments; ++i)
+			if (employmentList[i]->getBusinessNumber() == bussinessNum) return employmentList[i];
+		return nullptr;
+	}
+	static Employment* getEmploymentByName(string name)
+	{
+		for (int i = 0; i < numEmployments; ++i)
+			if (employmentList[i]->getCompanyName() == name) return employmentList[i];
+		return nullptr;
+	}
 };
 
 Employment* EmploymentCollection::employmentList[10] = {};
 int EmploymentCollection::numEmployments = 0;
-
-
-
-class Application
-{
-private:
-	string user_id_;
-	string business_num_;
-	string work_type_;
-	int max_applicants_;
-	string closing_date_;
-
-public:
-	Application(string user_id, string business_num, string work_type, const int max_applicants, string closing_date)
-	{
-		this->user_id_ = std::move(user_id);
-		this->business_num_ = std::move(business_num);
-		this->work_type_ = std::move(work_type);
-		this->max_applicants_ = max_applicants;
-		this->closing_date_ = std::move(closing_date);
-	}
-
-	string get_user_id() { return user_id_; }
-	string get_business_id() { return business_num_; }
-	string get_work_type() { return work_type_; }
-	int get_max_applicants() const { return max_applicants_; }
-	string get_closing_date() { return closing_date_; }
-};
-
-
-class ApplicationCollection {
-private:
-	Application* applications[100];
-	int applicationTotal = 0;
-
-public:
-	int total_count() { return total; } // 합계 카운터
-
-	bool checkBusinessNum(int businessNum) { //입력한 사업자번호와 지원완료한 회사의 사업자번호 비교 (True -> cancelApplication();)
-		for (int idx = 0; idx < total; idx++)
-			if (application[idx] == businessNum)
-				return true;
-
-		return false;
-	}
-
-	void add_application(Application application) { // 노예지원서 추가하기
-		applications[applicationTotal++] = applications; // 지원서 합계
-	}
-
-	void cancelApplication(int idx) { // 마감안했으면 지원취소 가능
-		aapplication[total--] = application;
-	}
-
-	Application get_application_by_index(int idx) { //인덱스로 지원서 뽀려오기
-		return applications[idx];
-	}
-
-	Application getBusinessNum(int businessNum) { //사업자번호 받아오기
-		return businessNum;
-	}
-};

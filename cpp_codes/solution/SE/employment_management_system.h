@@ -111,7 +111,6 @@ inline void ShowEmploymentList::showEmploymentInfo(string const& logged_in_user_
 }
 
 
-
 // 4.1.
 // Control class
 class CompanyNameSearchUI;
