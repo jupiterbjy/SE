@@ -188,12 +188,12 @@ public:
 	}
 
 	string get_user_id() { return user_id; }
-	string get_employment();
-	string get_company_name();
-	string get_business_number();
-	string get_dead_line();
-	int get_max_applicants();
-	string get_work_type();
+	string get_employment() const;
+	string get_company_name() const;
+	string get_business_number() const;
+	string get_dead_line() const;
+	int get_max_applicants() const;
+	string get_work_type() const;
 };
 
 
@@ -204,14 +204,14 @@ private:
 	int total_applicants = 0;
 
 public:
-	Application* addApplication(Employment* parent, const string& logged_in_user_id)
+	Application* add_application(Employment* parent, const string& logged_in_user_id)
 	{
 		// Create new application and return it
 		applications[total_applicants] = new Application(parent, logged_in_user_id);
 		return applications[total_applicants++];
 	}
 
-	Application* removeApplication(string const& logged_in_user_id, string const& business_num)
+	Application* remove_application(string const& logged_in_user_id, string const& business_num)
 	{
 		// find application
 		int target_idx = -1;
@@ -226,7 +226,7 @@ public:
 		}
 
 		// (Assuming search always succeeds) cache application
-		auto deleted_application = applications[target_idx];
+		const auto deleted_application = applications[target_idx];
 
 		// fill in gap
 		for (int idx=target_idx; idx < --total_applicants; idx++)
@@ -236,40 +236,45 @@ public:
 		return deleted_application;
 	}
 
-	int total_applications_count()
+	int total_applications_count() const
 	{
 		return total_applicants;
 	}
 
-	int getEmploymentNum() {
+	int get_employment_num() const
+	{
 		return total_applicants;
 	}
 
-	string getCompanyName(int index) {
+	string get_company_name(const int index) const
+	{
 		return applications[index]->get_company_name();
 	}
 
-	string getDeadline(int index) {
+	string get_deadline(const int index) const
+	{
 		return applications[index]->get_dead_line();
 	}
 
-	string getWork(int index) {
+	string get_work(const int index) const
+	{
 		return applications[index]->get_work_type();
 	}
 
-	string getBusinessNumber(int index) {
+	string get_business_number(const int index) const
+	{
 		return applications[index]->get_business_number();
 	}
 
-	Application* getEmploymentByIndex(int index)
+	Application* get_employment_by_index(const int index) const
 	{
 		return applications[index];
 	}
 
-	Application* getEmploymentByBussinessNum(string bussinessNum)
+	Application* get_employment_by_business_num(const string& business_num) const
 	{
 		for (int i = 0; i < total_applicants; ++i)
-			if (applications[i]->get_business_number() == bussinessNum) return applications[i];
+			if (applications[i]->get_business_number() == business_num) return applications[i];
 		return nullptr;
 	}
 };
@@ -278,124 +283,170 @@ public:
 class Employment
 {
 private:
-	string companyName;
+	string company_name;
 	string deadline;
 	string work_type;
 	int max_applicants;
-	string businessNum;
+	string business_num;
 
 public:
-	Employment(const string& companyName, const string& work_type, int max_applicants, const string& business_num, const string& deadline) {
-		this->companyName = companyName;
+	Employment(const string& company_name, const string& work_type, const int max_applicants, const string& business_num, const string& deadline) {
+		this->company_name = company_name;
 		this->deadline = deadline;
 		this->work_type = work_type;
 		this->max_applicants = max_applicants;
-		this->businessNum = business_num;
+		this->business_num = business_num;
 	}
 
-	string getCompanyName() {
-		return this->companyName;
+	string get_company_name() {
+		return this->company_name;
 	}
-	string getDeadline() {
+	string get_deadline() {
 		return this->deadline;
 	}
-	string getWork() {
+	string get_work() {
 		return this->work_type;
 	}
-	int getPeopleNumber() {
+	int get_max_applicants() const
+	{
 		return this->max_applicants;
 	}
-	string getBusinessNumber() {
-		return this->businessNum;
+	string get_business_number() {
+		return this->business_num;
 	}
 };
 
 class EmploymentCollection
 {
+private:
+	Employment* employment_list[100] = {};
+	int num_employments = 0;
+
+	string work_types[100];
+	int work_type_count = 0;
+
+	bool does_type_exists(string const& work_type) const
+	{
+		for (int idx = 0; idx < work_type_count; idx++)
+			if (work_types[0] == work_type)
+				return true;
+
+		return false;
+	}
+
+	void add_new_type(string const& work_type)
+	{
+		work_types[work_type_count++] = work_type;
+	}
+
 public:
-	Employment* employmentList[10];
-	int numEmployments;
-	Employment* getEmployment(int index) {
-		return employmentList[index];
+	Employment* get_employment(int index) const
+	{
+		return employment_list[index];
 	}
 
-	Employment* addEmployment(const string& companyName, const string& work_type, int max_applicants, const string& business_num, const string& deadline) {
+	Employment* add_employment(const string& company_name, const string& work_type, const int max_applicants, const string& business_num, const string& deadline) {
+		// Check if type exists, add if not
+		if (!does_type_exists(work_type))
+			add_new_type(work_type);
+
 		// Create new employment and return ref
-		Employment* new_employment = new Employment(companyName, work_type, max_applicants, business_num, deadline);
+		auto* new_employment = new Employment(company_name, work_type, max_applicants, business_num, deadline);
 
-		employmentList[numEmployments] = new_employment;
-		return employmentList[numEmployments++];
+		employment_list[num_employments] = new_employment;
+		return employment_list[num_employments++];
 	}
 
-	int getEmploymentNum() {
-		return numEmployments;
-	}
-
-	string getCompanyName(int index) {
-		return employmentList[index]->getCompanyName();
-	}
-
-	string getDeadline(int index) {
-		return employmentList[index]->getDeadline();
-	}
-
-	string getWork(int index) {
-		return employmentList[index]->getWork();
-	}
-
-	int getPeopleNumber(int index) {
-		return employmentList[index]->getPeopleNumber();
-	}
-
-	string getBusinessNumber(int index) {
-		return employmentList[index]->getBusinessNumber();
-	}
-
-	Employment* getEmploymentByIndex(int index)
+	int get_total_type_count() const
 	{
-		return employmentList[index];
+		return work_type_count;
 	}
-	Employment* getEmploymentByBussinessNum(string bussinessNum)
+
+	int get_total_employment_count() const
 	{
-		for (int i = 0; i < numEmployments; ++i)
-			if (employmentList[i]->getBusinessNumber() == bussinessNum) return employmentList[i];
+		return num_employments;
+	}
+
+	string get_work_type_by_index(const int idx)
+	{
+		return work_types[idx];
+	}
+
+	int get_employment_num() const
+	{
+		return num_employments;
+	}
+
+	string get_company_name(const int index) const
+	{
+		return employment_list[index]->get_company_name();
+	}
+
+	string get_deadline(const int index) const
+	{
+		return employment_list[index]->get_deadline();
+	}
+
+	string get_work(const int index) const
+	{
+		return employment_list[index]->get_work();
+	}
+
+	int get_max_applicants(const int index) const
+	{
+		return employment_list[index]->get_max_applicants();
+	}
+
+	string get_business_number(const int index) const
+	{
+		return employment_list[index]->get_business_number();
+	}
+
+	Employment* get_employment_by_index(const int index) const
+	{
+		return employment_list[index];
+	}
+	Employment* get_employment_by_business_num(const string& business_num) const
+	{
+		for (int i = 0; i < num_employments; ++i)
+			if (employment_list[i]->get_business_number() == business_num) return employment_list[i];
 		return nullptr;
 	}
-	Employment* getEmploymentByName(string name)
+	Employment* get_employment_by_name(const string& name) const
 	{
-		for (int i = 0; i < numEmployments; ++i)
-			if (employmentList[i]->getCompanyName() == name) return employmentList[i];
+		for (int i = 0; i < num_employments; ++i)
+			if (employment_list[i]->get_company_name() == name) return employment_list[i];
 		return nullptr;
 	}
 };
 
 
-inline string Application::get_employment()
+inline string Application::get_employment() const
 {
-	return parent->getBusinessNumber();
+	return parent->get_business_number();
 }
 
-inline string Application::get_company_name()
+inline string Application::get_company_name() const
 {
-	return parent->getCompanyName();
+	return parent->get_company_name();
 }
 
-inline string Application::get_business_number()
+inline string Application::get_business_number() const
 {
-	return parent->getBusinessNumber();
+	return parent->get_business_number();
 }
 
-inline string Application::get_dead_line()
+inline string Application::get_dead_line() const
 {
-	return parent->getDeadline();
+	return parent->get_deadline();
 }
 
-inline int Application::get_max_applicants()
+inline int Application::get_max_applicants() const
 {
-	return parent->getPeopleNumber();
+	return parent->get_max_applicants();
 }
 
-inline string Application::get_work_type()
+inline string Application::get_work_type() const
 {
-	return parent->getWork();
+	return parent->get_work();
 }

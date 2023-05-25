@@ -7,7 +7,7 @@
 using namespace std;
 
 
-//Controll Class
+//Control Class
 //회사 즉시 지원
 class NowApplication {
 private:
@@ -24,24 +24,25 @@ public:
     Application* add_new_application(string const& logged_in_user_id, string const& business_num) const
     {
         // get applied employment by business_num
-        Employment* employment = employment_collection->getEmploymentByBussinessNum(business_num);
+        Employment* employment = employment_collection->get_employment_by_business_num(business_num);
 
         // apply & return new obj ref
-        return application_collection->addApplication(employment, logged_in_user_id);
+        return application_collection->add_application(employment, logged_in_user_id);
     }
 };
 
 
 //Boundary Class
 //회사 즉시 지원 UI
-class NowApplicationUI {// 사업자번호 -> 회사이름, 사업자번호, 업무
+class NowApplicationUi {// 사업자번호 -> 회사이름, 사업자번호, 업무
 private:
     NowApplication control;
 
 public:
-    NowApplicationUI(ApplicationCollection* application_collection, EmploymentCollection* employment_collection) : control(application_collection, employment_collection) {};
+    NowApplicationUi(ApplicationCollection* application_collection, EmploymentCollection* employment_collection) : control(application_collection, employment_collection) {};
 
-    void start_interface(string const& logged_in_user_id, ifstream& in_fp, ofstream& out_fp) {
+    void start_interface(string const& logged_in_user_id, ifstream& in_fp, ofstream& out_fp) const
+    {
         // get input
     	string business_num;
         in_fp >> business_num;
@@ -57,14 +58,14 @@ public:
 //Controll Class
 //지원 정보 조회 클래스
 //일반 유저가 지원한 회사 전부를 보여줌
-class ApplicationCheckUI;
+class ApplicationCheckUi;
 class ApplicationCheck {
 private:
     ApplicationCollection* collection;
-    ApplicationCheckUI* ui;
+    ApplicationCheckUi* ui;
 
 public:
-    ApplicationCheck(ApplicationCollection* collection, ApplicationCheckUI* ui)
+    ApplicationCheck(ApplicationCollection* collection, ApplicationCheckUi* ui)
     {
         this->collection = collection;
         this->ui = ui;
@@ -76,13 +77,13 @@ public:
 
 //Boundary Class
 //지원 정보 조회 UI 클래스
-class ApplicationCheckUI { // { user_id -> 회사이름, 사업자번호, 업무, 인원 수, 신청마감일 }*
+class ApplicationCheckUi { // { user_id -> 회사이름, 사업자번호, 업무, 인원 수, 신청마감일 }*
 private:
     ApplicationCheck* control;
     ofstream* out_stream;
 
 public:
-    ApplicationCheckUI(ApplicationCollection* collection)
+    ApplicationCheckUi(ApplicationCollection* collection)
     {
         out_stream = nullptr;
         this->control = new ApplicationCheck(collection, this);
@@ -106,7 +107,7 @@ inline void ApplicationCheck::show_applications_info(string const& logged_in_use
 {
 	for (int idx=0; idx < collection->total_applications_count(); idx++)
 	{
-        auto application = collection->getEmploymentByIndex(idx);
+        auto application = collection->get_employment_by_index(idx);
 
         // if same id, write it out
         if (application->get_user_id() == logged_in_user_id)
@@ -129,21 +130,22 @@ public:
 
     Application* cancel_application(string const& logged_in_user_id, string const& business_num) const
     {
-        return collection->removeApplication(logged_in_user_id, business_num);
+        return collection->remove_application(logged_in_user_id, business_num);
     }
 };
 
 
 //Boundary Class
 //지원 취소 UI 클래스
-class CancelApplicationUI { // 사업자번호 -> 회사이름, 사업자번호, 업무
+class CancelApplicationUi { // 사업자번호 -> 회사이름, 사업자번호, 업무
 private:
     CancelApplication control;
 
 public:
-    CancelApplicationUI(ApplicationCollection* collection) : control(collection) {}
+    CancelApplicationUi(ApplicationCollection* collection) : control(collection) {}
 
-    void start_interface(string const& logged_in_user_id, ifstream& in_fp, ofstream& out_fp) {
+    void start_interface(string const& logged_in_user_id, ifstream& in_fp, ofstream& out_fp) const
+    {
         string business_num;
         in_fp >> business_num;
 

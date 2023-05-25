@@ -8,12 +8,12 @@ using namespace std;
 
 
 // control(5.1. 등록 통계 출력)
-class EmploymentStatUI;
+class EmploymentStatUi;
 class ShowEmploymentStat {
 private:
     EmploymentCollection* employment_collection;
     ApplicationCollection* application_collection;
-    EmploymentStatUI* ui;
+    EmploymentStatUi* ui;
 
     int run_statistics(const string& keyword, const string& id) const
     {
@@ -21,12 +21,12 @@ private:
 
         for (int idx = 0; idx < employment_collection->get_total_employment_count(); idx++) {
 
-            Employment* employment = employment_collection->getEmploymentByIndex(idx);
+            Employment* employment = employment_collection->get_employment_by_index(idx);
 
             // 주어진 키워드 업무에 대해
             // ID 동일한지, 키워드 동일한지 확인
             // 동일하면 통계 += 1
-            if (employment->getCompanyName() == id && keyword == employment->getWork())
+            if (employment->get_company_name() == id && keyword == employment->get_work())
                 total++;
         }
 
@@ -35,46 +35,46 @@ private:
     }
 
 public:
-    ShowEmploymentStat(EmploymentCollection* employment_collection, ApplicationCollection* application_collection, EmploymentStatUI* ui) {
+    ShowEmploymentStat(EmploymentCollection* employment_collection, ApplicationCollection* application_collection, EmploymentStatUi* ui) {
         this->employment_collection = employment_collection;
         this->application_collection = application_collection;
         this->ui = ui;
     }
 
-    void runAllStatistics(string const& id);
+    void run_all_statistics(string const& id);
 };
 
 
 // ui(5.1. 등록 통계 출력)
-class EmploymentStatUI
+class EmploymentStatUi
 {
 private:
     ShowEmploymentStat* control;
     ofstream* out_stream;
 
 public:
-    EmploymentStatUI(EmploymentCollection* employment_collection, ApplicationCollection* application_collection)
+    EmploymentStatUi(EmploymentCollection* employment_collection, ApplicationCollection* application_collection)
     {
         out_stream = nullptr;
         control = new ShowEmploymentStat(employment_collection, application_collection, this);
     }
 
-    void outputStatistics(const string& workKeyword, int total)
+    static void output_statistics(const string& work_keyword, int total)
     {
-        cout << "> " << workKeyword << " " << total << endl;
+        cout << "> " << work_keyword << " " << total << endl;
     }
 
-    void startInterface(string const& logged_in_user_id, ofstream& out_fp)
+    void start_interface(string const& logged_in_user_id, ofstream& out_fp)
     {
         out_stream = &out_fp;
 
         out_fp << "5.1. 지원 정보 통계" << endl;
-        control->runAllStatistics(logged_in_user_id);
+        control->run_all_statistics(logged_in_user_id);
     }
 };
 
 
-inline void ShowEmploymentStat::runAllStatistics(string const& id)
+inline void ShowEmploymentStat::run_all_statistics(string const& id)
 {
     // EmploymentCollection에 등록된 전체 업무 키워드에 대해
     for (int idx = 0; idx < employment_collection->get_total_type_count(); idx++) {
@@ -84,18 +84,18 @@ inline void ShowEmploymentStat::runAllStatistics(string const& id)
 
         // 해당 키워드와 유저 ID에 대한 통계 계산 후
         // 바운더리 클래스에게 해당 업무 키워드에 대한 통계 출력 위임
-        ui->outputStatistics(keyword, run_statistics(keyword, id));
+        ui->output_statistics(keyword, run_statistics(keyword, id));
     }
 }
 
 
 // control(5.2. 지원 통계 출력)
-class ApplicationStatUI;
+class ApplicationStatUi;
 class ShowApplicationStat {
 private:
     EmploymentCollection* employment_collection;
     ApplicationCollection* application_collection;
-    ApplicationStatUI* ui;
+    ApplicationStatUi* ui;
 
     int run_statistics(const string& keyword, const string& id) const
     {
@@ -103,7 +103,7 @@ private:
 
         for (int idx = 0; idx < employment_collection->get_total_employment_count(); idx++) {
 
-            Application* application = application_collection->getEmploymentByIndex(idx);
+            Application* application = application_collection->get_employment_by_index(idx);
 
             // 주어진 키워드 업무에 대해
             // ID 동일한지, 키워드 동일한지 확인
@@ -116,46 +116,46 @@ private:
     }
 
 public:
-    ShowApplicationStat(EmploymentCollection* employment_collection, ApplicationCollection* application_collection, ApplicationStatUI* ui) {
+    ShowApplicationStat(EmploymentCollection* employment_collection, ApplicationCollection* application_collection, ApplicationStatUi* ui) {
         this->employment_collection = employment_collection;
         this->application_collection = application_collection;
         this->ui = ui;
     }
 
-    void runAllStatistics(string const& id);
+    void run_all_statistics(string const& id) const;
 };
 
 
 // ui(5.2. 지원 통계 출력)
-class ApplicationStatUI
+class ApplicationStatUi
 {
 private:
     ShowApplicationStat* control;
     ofstream* out_stream;
 
 public:
-    ApplicationStatUI(EmploymentCollection* employment_collection, ApplicationCollection* application_collection)
+    ApplicationStatUi(EmploymentCollection* employment_collection, ApplicationCollection* application_collection)
     {
         out_stream = nullptr;
         control = new ShowApplicationStat(employment_collection, application_collection, this);
     }
 
-    void outputStatistics(const string& workKeyword, int total)
+    static void output_statistics(const string& work_keyword, int total)
     {
-        cout << "> " << workKeyword << " " << total << endl;
+        cout << "> " << work_keyword << " " << total << endl;
     }
 
-    void startInterface(string const& logged_in_user_id, ofstream& out_fp)
+    void start_interface(string const& logged_in_user_id, ofstream& out_fp)
     {
         out_stream = &out_fp;
 
         out_fp << "5.1. 지원 정보 통계" << endl;
-        control->runAllStatistics(logged_in_user_id);
+        control->run_all_statistics(logged_in_user_id);
     }
 };
 
 
-inline void ShowApplicationStat::runAllStatistics(string const& id)
+inline void ShowApplicationStat::run_all_statistics(string const& id) const
 {
     // EmploymentCollection에 등록된 전체 업무 키워드에 대해
     for (int idx = 0; idx < employment_collection->get_total_type_count(); idx++) {
@@ -165,7 +165,7 @@ inline void ShowApplicationStat::runAllStatistics(string const& id)
 
         // 해당 키워드와 유저 ID에 대한 통계 계산 후
         // 바운더리 클래스에게 해당 업무 키워드에 대한 통계 출력 위임
-        ui->outputStatistics(keyword, run_statistics(keyword, id));
+        ui->output_statistics(keyword, run_statistics(keyword, id));
     }
 }
 

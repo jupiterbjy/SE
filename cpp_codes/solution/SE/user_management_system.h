@@ -28,12 +28,12 @@ public:
 
 
 // Boundary Class
-class AddCommonUserUI {
+class AddCommonUserUi {
 private:
 	AddNewCommonUser control;
 
 public:
-	AddCommonUserUI(UserManager* manager) : control(manager) {}
+	AddCommonUserUi(UserManager* manager) : control(manager) {}
 
 	void start_interface(ifstream& in_fp, ofstream& out_fp)
 	{
@@ -67,12 +67,12 @@ public:
 
 
 // Boundary Class
-class AddCompanyUserUI {
+class AddCompanyUserUi {
 private:
 	AddNewCompanyUser control;
 
 public:
-	AddCompanyUserUI(UserManager* manager) : control(manager) {}
+	AddCompanyUserUi(UserManager* manager) : control(manager) {}
 
 	void start_interface(ifstream& in_fp, ofstream& out_fp)
 	{
@@ -124,13 +124,13 @@ public:
 };
 
 // Boundary Class
-class LoginUI
+class LoginUi
 {
 private:
 	LoginManager control;
 
 public:
-	LoginUI(UserManager* manager) : control(manager) {}
+	LoginUi(UserManager* manager) : control(manager) {}
 
 	string start_interface(ifstream& in_fp, ofstream& out_fp)
 	{
@@ -165,13 +165,13 @@ public:
 };
 
 // Boundary Class
-class LogoutUI
+class LogoutUi
 {
 private:
 	LogoutManager control;
 
 public:
-	LogoutUI(UserManager* manager) : control(manager) {}
+	LogoutUi(UserManager* manager) : control(manager) {}
 
 	void start_interface(string const& logged_in_user_id, ofstream& out_fp)
 	{
@@ -190,27 +190,27 @@ public:
 		this->manager = manager;
 	}
 
-	void withdrawalUser(const string& logged_in_user_id)
+	void withdrawal_user(const string& logged_in_user_id) const
 	{
 		manager->delete_user_by_id(logged_in_user_id);
 	}
 };
 
-// boundary(회원 탈퇴)
-class UserWithdrawalUI
+// ui(회원 탈퇴)
+class UserWithdrawalUi
 {
 private:
 	UserWithdrawal control;
 public:
-	UserWithdrawalUI(UserManager* manager) : control(manager) {}
+	UserWithdrawalUi(UserManager* manager) : control(manager) {}
 
-	void startInterface(const string& logged_in_user_id, ofstream& out_fp)
+	void start_interface(const string& logged_in_user_id, ofstream& out_fp) const
 	{
 		// jupiterbjy: Maybe we should've design this to have super class with static var
 		// that is keeping logged in user's ID, so we can unify interfaces
 
 		out_fp << "1.2. 회원탈퇴" << endl;
-		control.withdrawalUser(logged_in_user_id);
+		control.withdrawal_user(logged_in_user_id);
 		out_fp << "> " << logged_in_user_id << endl;
 	}
 };
