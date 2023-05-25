@@ -156,7 +156,7 @@ void doTask(ifstream& in_fp, ofstream& out_fp)
                 {
                     case 1: // 4.1. 채용 정보 검색
                     {
-                        company_search_ui.startInterface(in_fp, out_fp);
+                        company_search_ui.start_interface(in_fp, out_fp);
                         break;
                     }
                     case 2: // 4.2. 채용 지원
@@ -202,7 +202,6 @@ void doTask(ifstream& in_fp, ofstream& out_fp)
             }
         }
     }
-    return;
 }
 
 
