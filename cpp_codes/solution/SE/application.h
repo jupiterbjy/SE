@@ -4,9 +4,6 @@
 #include <string>
 #include "entities.h"
 
-#define RETURN_OK 0
-#define RETURN_ERROR -1
-
 using namespace std;
 
 
@@ -14,20 +11,26 @@ using namespace std;
 //회사 즉시 지원
 class NowApplication {
 private:
-    Application* application;
+    EmploymentCollection* employment_collection;
+    ApplicationCollection* application_collection;
 
 public:
-    NowApplication(Application* app) : application(app) {}
-    Application* application()
+    NowApplication(ApplicationCollection* application_collection, EmploymentCollection* employment_collection)
     {
-        Employment* emp = EmploymentCollection::getEmploymentByBussinessNum(application->get_business_number());  //지원했던 회사 가져오기
-        ApplicationCollection* aCollection = emp->getApplicationCollection();  //해당 회사의 지원서 뭉치 가져오기
-        aCollection->add_application(application);  //지원서 삭제
-        return application;
+        this->application_collection = application_collection;
+        this->employment_collection = employment_collection;
     }
 
-    Application* getApplication() { return application; }
+    Application* add_new_application(string const& logged_in_user_id, string const& business_num) const
+    {
+        // get applied employment by business_num
+        Employment* employment = employment_collection->getEmploymentByBussinessNum(business_num);
+
+        // apply & return new obj ref
+        return application_collection->addApplication(employment, logged_in_user_id);
+    }
 };
+
 
 //Boundary Class
 //회사 즉시 지원 UI
@@ -36,119 +39,116 @@ private:
     NowApplication control;
 
 public:
-    NowApplicationUI(NowApplication application) : control(application) {};
+    NowApplicationUI(ApplicationCollection* application_collection, EmploymentCollection* employment_collection) : control(application_collection, employment_collection) {};
 
-    void startInterface(User* loginUser) {
-        cout << "4.2. 채용 지원" << endl;
-        Application* app = control.application();
-        cout << "> "
-            << app->get_company_name() << " "
-            << app->get_business_number() << " "
-            << app->get_work_type() << endl;
+    void start_interface(string const& logged_in_user_id, ifstream& in_fp, ofstream& out_fp) {
+        // get input
+    	string business_num;
+        in_fp >> business_num;
+
+        // Echo back command & run action, then output again
+        out_fp << "4.2. 채용 지원" << endl;
+        auto application = control.add_new_application(logged_in_user_id, business_num);
+        out_fp << "> "<< application->get_company_name() << " " << application->get_business_number() << " " << application->get_work_type() << endl;
     }
 };
+
 
 //Controll Class
 //지원 정보 조회 클래스
 //일반 유저가 지원한 회사 전부를 보여줌
-
+class ApplicationCheckUI;
 class ApplicationCheck {
 private:
-    Application* applications[11];
-    User* user;
-    int max_applications = 0;
+    ApplicationCollection* collection;
+    ApplicationCheckUI* ui;
 
 public:
-    ApplicationCheck(User* user) : user(user) {
-    }
-
-    Application** getApplications()
+    ApplicationCheck(ApplicationCollection* collection, ApplicationCheckUI* ui)
     {
-        Application* tmp;
-        for (Employment* emp : EmploymentCollection::employmentList)
-        {
-            tmp = emp->getApplicationCollection()->get_application_by_user_id(user->get_id());
-            if (tmp != nullptr) applications[max_applications++] = tmp;
-            if (max_applications >= 11) break;
-        }
-        applications[max_applications] = nullptr;
+        this->collection = collection;
+        this->ui = ui;
+    }
 
-        return applications;
-    }
-    /* 어디서 사용?
-    static Employment* getEmployments(User* loginUser) {
-        CompanyUser* companyUser = manager.get_company_user(loginUser->get_id());
-        string businessNum = companyUser->get_business_num();
-        string companyName = companyUser->get_company_name();
-        string workType = employment.get_work_type();
-        int applicantNum = employment.get_applicantNum();
-        int employmentDeadline = employment.get_deadline();
-    }
-    */
+    void show_applications_info(string const& logged_in_user_id);
 };
+
 
 //Boundary Class
 //지원 정보 조회 UI 클래스
 class ApplicationCheckUI { // { user_id -> 회사이름, 사업자번호, 업무, 인원 수, 신청마감일 }*
 private:
     ApplicationCheck* control;
+    ofstream* out_stream;
 
 public:
-    ApplicationCheckUI(User* user) {
-        control = new ApplicationCheck(user);
-    };
+    ApplicationCheckUI(ApplicationCollection* collection)
+    {
+        out_stream = nullptr;
+        this->control = new ApplicationCheck(collection, this);
+    }
 
     //void startInterface(User* loginUser) {
-    void startInterface() {
-        cout << "4.3. 지원 정보 조회" << endl;
-        Application** applications = control->getApplications();
-        for (Application* app = *applications; app != nullptr; ++app)
-            cout << "> "
-            << app->get_company_name() << " "
-            << app->get_business_number() << " "
-            << app->get_work_type() << " "
-            << app->get_people_number() << " "
-            << app->get_dead_line() << endl;
+    void start_interface(string const& logged_in_user_id, ofstream& out_fp)
+	{
+        out_fp << "4.3. 지원 정보 조회" << endl;
+        control->show_applications_info(logged_in_user_id);
+    }
+
+    void write_application(string const& company_name, string const& business_num, string const& work_type, int const max_applicants, string const& dead_line) const
+    {
+        *(out_stream) << "> " << company_name << " " << business_num << " " << work_type << " " << max_applicants << " " << dead_line << endl;
     }
 };
 
-//Controll Class
+
+inline void ApplicationCheck::show_applications_info(string const& logged_in_user_id)
+{
+	for (int idx=0; idx < collection->total_applications_count(); idx++)
+	{
+        auto application = collection->getEmploymentByIndex(idx);
+
+        // if same id, write it out
+        if (application->get_user_id() == logged_in_user_id)
+            ui->write_application(application->get_company_name(), application->get_business_number(), application->get_work_type(), application->get_max_applicants(), application->get_dead_line());
+	}
+}
+
+
+
+//Control Class
 //지원 취소 클래스
 class CancelApplication {
 private:
-    User* user;
+    ApplicationCollection* collection;
 
 public:
-    //회사이름 오름차순 정렬 필요
-    CancelApplication(User* user) : user(user) {
+    CancelApplication(ApplicationCollection* collection) {
+        this->collection = collection;
     }
 
-    Application* getApplication(string businessNum)
+    Application* cancel_application(string const& logged_in_user_id, string const& business_num) const
     {
-        Application* tmp;
-        Employment* emp = EmploymentCollection::getEmploymentByBussinessNum(businessNum);  //지원했던 회사 가져오기
-        ApplicationCollection* aCollection = emp->getApplicationCollection();  //해당 회사의 지원서 뭉치 가져오기
-        tmp = aCollection->get_application_by_user_id(user->get_id());  //지울 지원서 가져오기
-        aCollection->cancel_application(aCollection->get_index_by_user_id(user->get_id()));  //지원서 삭제
-
-        return tmp;
+        return collection->removeApplication(logged_in_user_id, business_num);
     }
 };
+
 
 //Boundary Class
 //지원 취소 UI 클래스
 class CancelApplicationUI { // 사업자번호 -> 회사이름, 사업자번호, 업무
 private:
-    CancelApplication* control;
+    CancelApplication control;
 
 public:
-    CancelApplicationUI(User* user) {
-        control = new CancelApplication(user);
-    }
+    CancelApplicationUI(ApplicationCollection* collection) : control(collection) {}
 
-    void startInterface(string businessNum) {
-        cout << "4.4. 지원 취소" << endl;
-        Application* application = control->getApplication(businessNum);
+    void start_interface(string const& logged_in_user_id, ifstream& in_fp, ofstream& out_fp) {
+        string business_num;
+        in_fp >> business_num;
+
+        out_fp << "4.4. 지원 취소" << endl;
+        Application* application = control.cancel_application(logged_in_user_id, business_num);
         cout << "> "
             << application->get_company_name() << " "
             << application->get_business_number() << " "

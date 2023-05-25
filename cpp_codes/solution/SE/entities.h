@@ -211,26 +211,29 @@ public:
 		return applications[total_applicants++];
 	}
 
-	void removeApplication(string const& business_num, string const& logged_in_user_id)
+	Application* removeApplication(string const& logged_in_user_id, string const& business_num)
 	{
 		// find application
 		int target_idx = -1;
 
 		for (int idx=0; idx < total_applicants; idx++)
 		{
-			if (applications[idx]->get_business_number() == business_num)
+			if (applications[idx]->get_business_number() == business_num && applications[idx]->get_user_id() == logged_in_user_id)
 			{
 				target_idx = idx;
 				break;
 			}
 		}
 
-		// (Assuming search always succeeds) delete application
-		delete applications[target_idx];
+		// (Assuming search always succeeds) cache application
+		auto deleted_application = applications[target_idx];
 
 		// fill in gap
 		for (int idx=target_idx; idx < --total_applicants; idx++)
 			applications[idx] = applications[idx + 1];
+
+		// return
+		return deleted_application;
 	}
 
 	int total_applications_count()

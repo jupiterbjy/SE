@@ -92,14 +92,13 @@ public:
 
     void write_employment(string const& work_type, int total_applicants, string const& dead_line) const
     {
-        *(out_stream) << "> " << work_type << total_applicants << dead_line << endl;
+        *(out_stream) << "> " << work_type << " " << total_applicants << " " << dead_line << endl;
     }
 };
 
 
 inline void ShowEmploymentList::showEmploymentInfo(string const& logged_in_user_id)
 {
-    // TODO: missing collection get total count method
     for (int idx=0; idx < collection->numEmployments; idx++)
     {
         auto employment = collection->getEmployment(idx);
@@ -166,7 +165,6 @@ public:
 inline void CompanyNameSearch::searchCompanyName(string const& company_name)
 {
     // iterate and find target company name
-    // TODO: missing collection get total count method
     for (int idx = 0; idx < collection->numEmployments; idx++)
     {
         auto employment = collection->getEmployment(idx);

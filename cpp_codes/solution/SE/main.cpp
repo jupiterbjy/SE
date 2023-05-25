@@ -66,16 +66,16 @@ void doTask(ifstream& in_fp, ofstream& out_fp)
     // Employment Management system
     EmploymentAddUI employment_add_ui(&employment_collection);
     ShowEmploymentListUI employment_list_ui(&employment_collection);
+    CompanyNameSearchUI company_search_ui(&employment_collection);
 
     // statistics system
     ApplicationStatUI application_stat_ui(&application_collection);
     EmploymentStatUI employment_stat_ui(&employment_collection);
 
     // Application Management system
-    NewApplicationUI apply_now_ui;
+    NowApplicationUI apply_now_ui(&application_collection, &employment_collection);
     CancelApplicationUI application_cancel_ui(&application_collection);
     ApplicationCheckUI application_check_ui(&application_collection);
-    CompanyNameSearchUI company_search_ui(&application_collection);
 
 
     // Keep logged in user's info - default is empty, so safe to init like this
@@ -161,17 +161,17 @@ void doTask(ifstream& in_fp, ofstream& out_fp)
                     }
                     case 2: // 4.2. 채용 지원
                     {
-                        apply_now_ui.startInterface(logged_in_user_id, in_fp, out_fp);
+                        apply_now_ui.start_interface(logged_in_user_id, in_fp, out_fp);
                         break;
                     }
                     case 3: // 4.3. 지원 정보 조회
                     {
-                        application_check_ui.startInterface(logged_in_user_id, out_fp);
+                        application_check_ui.start_interface(logged_in_user_id, out_fp);
                         break;
                     }
                     case 4: // 4.4. 지원 취소
                     {
-                        application_cancel_ui.startInterface(logged_in_user_id, in_fp, out_fp);
+                        application_cancel_ui.start_interface(logged_in_user_id, in_fp, out_fp);
                         break;
                     }
                 }
