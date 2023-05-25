@@ -78,9 +78,10 @@ private:
     ShowEmploymentList* control;
     ofstream* out_stream;
 public:
-    ShowEmploymentListUI()
+    ShowEmploymentListUI(EmploymentCollection* collection)
     {
-	    
+        out_stream = nullptr;
+        this->control = new ShowEmploymentList(collection, this);
     }
 
     void start_interface(string const &logged_in_user_id, ofstream& out_fp)
@@ -173,6 +174,6 @@ inline void CompanyNameSearch::searchCompanyName(string const& company_name)
 
         // if matches, print it out
         if (employment->getCompanyName() == company_name)
-            ui->write_employment(employment->getCompanyName(), employment.getBusinessNum(), employment.getWorkType(), employment->getPeopleNumber(), employment->getDeadline());
+            ui->write_employment(employment->getCompanyName(), employment->getBusinessNum(), employment->getWork(), employment->getPeopleNumber(), employment->getDeadline());
     }
 }

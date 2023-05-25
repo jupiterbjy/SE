@@ -57,25 +57,25 @@ void doTask(ifstream& in_fp, ofstream& out_fp)
 
     // Instantiate controls & boundaries
     // User management system
-    AddCompanyUserUI add_company_ui(user_manager);
-    AddCommonUserUI add_common_ui(user_manager);
-    LoginUI login_ui(user_manager);
-    LogoutUI logout_ui(user_manager);
-    UserWithdrawalUI user_withdrawal_ui(user_manager);
+    AddCompanyUserUI add_company_ui(&user_manager);
+    AddCommonUserUI add_common_ui(&user_manager);
+    LoginUI login_ui(&user_manager);
+    LogoutUI logout_ui(&user_manager);
+    UserWithdrawalUI user_withdrawal_ui(&user_manager);
 
     // Employment Management system
-    EmploymentAddUI employment_add_ui;
-    ShowEmploymentListUI employment_list_ui;
+    EmploymentAddUI employment_add_ui(&employment_collection);
+    ShowEmploymentListUI employment_list_ui(&employment_collection);
 
     // statistics system
-    ApplicationStatUI application_stat_ui(application_collection);
-    EmploymentStatUI employment_stat_ui(employment_collection);
+    ApplicationStatUI application_stat_ui(&application_collection);
+    EmploymentStatUI employment_stat_ui(&employment_collection);
 
     // Application Management system
     NewApplicationUI apply_now_ui;
-    CancelApplicationUI application_cancel_ui(application_collection);
-    ApplicationCheckUI application_check_ui(application_collection);
-    CompanyNameSearchUI company_search_ui(application_collection);
+    CancelApplicationUI application_cancel_ui(&application_collection);
+    ApplicationCheckUI application_check_ui(&application_collection);
+    CompanyNameSearchUI company_search_ui(&application_collection);
 
 
     // Keep logged in user's info - default is empty, so safe to init like this
@@ -140,7 +140,7 @@ void doTask(ifstream& in_fp, ofstream& out_fp)
                 {
                     case 1: // 3.1. 채용 정보 등록
                     {
-                        employment_add_ui.start_interface(in_fp, out_fp);
+                        employment_add_ui.start_interface(logged_in_user_id, in_fp, out_fp);
                         break;
                     }
                     case 2: // 3.2. 등록된 채용 정보 조회

@@ -12,19 +12,20 @@ using namespace std;
 class AddNewCommonUser
 {
 private:
-	UserManager manager;
+	UserManager* manager;
 
 public:
-	AddNewCommonUser(const UserManager& manager)
+	AddNewCommonUser(UserManager* manager)
 	{
 		this->manager = manager;
 	}
 
 	void add_user(string id, string pw, string name, string ssn)
 	{
-		manager.add_common_user(id, pw, name, ssn);
+		manager->add_common_user(id, pw, name, ssn);
 	}
 };
+
 
 // Boundary Class
 class AddCommonUserUI {
@@ -32,7 +33,7 @@ private:
 	AddNewCommonUser control;
 
 public:
-	AddCommonUserUI(const UserManager& manager) : control(manager) {}
+	AddCommonUserUI(UserManager* manager) : control(manager) {}
 
 	void start_interface(ifstream& in_fp, ofstream& out_fp)
 	{
@@ -45,23 +46,25 @@ public:
 	}
 };
 
+
 // Control Class
 class AddNewCompanyUser
 {
 private:
-	UserManager manager;
+	UserManager* manager;
 
 public:
-	AddNewCompanyUser(const UserManager& manager)
+	AddNewCompanyUser(UserManager* manager)
 	{
 		this->manager = manager;
 	}
 
 	void add_user(string id, string pw, string company_name, string business_num)
 	{
-		manager.add_company_user(id, pw, company_name, business_num);
+		manager->add_company_user(id, pw, company_name, business_num);
 	}
 };
+
 
 // Boundary Class
 class AddCompanyUserUI {
@@ -69,7 +72,7 @@ private:
 	AddNewCompanyUser control;
 
 public:
-	AddCompanyUserUI(const UserManager& manager) : control(manager) {}
+	AddCompanyUserUI(UserManager* manager) : control(manager) {}
 
 	void start_interface(ifstream& in_fp, ofstream& out_fp)
 	{
@@ -84,14 +87,15 @@ public:
 	}
 };
 
+
 // Control Class
 class LoginManager
 {
 private:
-	UserManager manager;
+	UserManager* manager;
 
 public:
-	LoginManager(const UserManager& manager)
+	LoginManager(UserManager* manager)
 	{
 		this->manager = manager;
 	}
@@ -100,17 +104,17 @@ public:
 	{
 		// Very wanky due to initial User designs
 		// Check if given ID is common user or not
-		if (manager.is_user_common(id))
+		if (manager->is_user_common(id))
 		{
 			// if so, get user and check password - Not sure if required
 			// Not factoring in pw verification fail case, as it's undefined
-			User* user = manager.get_common_user(id);
+			User* user = manager->get_common_user(id);
 			if (user->is_pwd_valid(pw))
 				return user;
 		}
 		else
 		{
-			User* user = manager.get_company_user(id);
+			User* user = manager->get_company_user(id);
 			if (user->is_pwd_valid(pw))
 				return user;
 		}
@@ -126,7 +130,7 @@ private:
 	LoginManager control;
 
 public:
-	LoginUI(const UserManager& manager) : control(manager) {}
+	LoginUI(UserManager* manager) : control(manager) {}
 
 	string start_interface(ifstream& in_fp, ofstream& out_fp)
 	{
@@ -145,10 +149,10 @@ public:
 class LogoutManager
 {
 private:
-	UserManager manager;
+	UserManager* manager;
 
 public:
-	LogoutManager(const UserManager& manager)
+	LogoutManager(UserManager* manager)
 	{
 		this->manager = manager;
 	}
@@ -157,7 +161,6 @@ public:
 	{
 		// Due to design change, this method got nothing to do
 		// This feels VERY wrong
-		return;
 	}
 };
 
@@ -168,7 +171,7 @@ private:
 	LogoutManager control;
 
 public:
-	LogoutUI(const UserManager& manager) : control(manager) {}
+	LogoutUI(UserManager* manager) : control(manager) {}
 
 	void start_interface(string const& logged_in_user_id, ofstream& out_fp)
 	{
@@ -181,15 +184,15 @@ public:
 // control(회원 탈퇴)
 class UserWithdrawal {
 private:
-	UserManager manager;
+	UserManager* manager;
 public:
-	UserWithdrawal(const UserManager& manager) {
+	UserWithdrawal(UserManager* manager) {
 		this->manager = manager;
 	}
 
 	void withdrawalUser(const string& logged_in_user_id)
 	{
-		manager.delete_user_by_id(logged_in_user_id);
+		manager->delete_user_by_id(logged_in_user_id);
 	}
 };
 
@@ -199,9 +202,9 @@ class UserWithdrawalUI
 private:
 	UserWithdrawal control;
 public:
-	UserWithdrawalUI(const UserManager& manager) : control(manager) {}
+	UserWithdrawalUI(UserManager* manager) : control(manager) {}
 
-	void startInterface(string logged_in_user_id, ofstream& out_fp)
+	void startInterface(const string& logged_in_user_id, ofstream& out_fp)
 	{
 		// jupiterbjy: Maybe we should've design this to have super class with static var
 		// that is keeping logged in user's ID, so we can unify interfaces
