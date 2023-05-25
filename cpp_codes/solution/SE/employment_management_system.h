@@ -21,7 +21,7 @@ public:
         this->collection = collection;
     }
 
-    void addEmployment(string const& company_name, string const& work_type, int max_applicants, string const& deadline);
+    void addEmployment(string const& company_name, string const& work_type, int max_applicants, string const& business_num, string const& deadline);
 };
 
 
@@ -34,21 +34,21 @@ public:
 
     void start_interface(string const& user_id, ifstream& in_fp, ofstream& out_fp)
 	{
-        string work_type, deadline;
+        string work_type, business_num, deadline;
         int max_applicants;
 
-        in_fp >> work_type >> max_applicants >> deadline;
+        in_fp >> work_type >> max_applicants >> business_num >> deadline;
 
         out_fp << "3.1. 채용 정보 등록" << endl;
-        control.addEmployment(user_id, work_type, max_applicants, deadline);
+        control.addEmployment(user_id, work_type, max_applicants, business_num, deadline);
         out_fp << "> " << work_type << " " << max_applicants << " " << deadline << endl;
     }
 };
 
 
-inline void EmploymentAdd::addEmployment(string const& company_name, string const& work_type, int max_applicants, string const& deadline)
+inline void EmploymentAdd::addEmployment(string const& company_name, string const& work_type, int max_applicants, string const& business_num, string const& deadline)
 {
-    collection->addEmployment(company_name, work_type, max_applicants, deadline);
+    collection->addEmployment(company_name, work_type, max_applicants, business_num, deadline);
 }
 
 
@@ -173,6 +173,6 @@ inline void CompanyNameSearch::searchCompanyName(string const& company_name)
 
         // if matches, print it out
         if (employment->getCompanyName() == company_name)
-            ui->write_employment(employment->getCompanyName(), employment->getBusinessNum(), employment->getWork(), employment->getPeopleNumber(), employment->getDeadline());
+            ui->write_employment(employment->getCompanyName(), employment->getBusinessNumber(), employment->getWork(), employment->getPeopleNumber(), employment->getDeadline());
     }
 }
