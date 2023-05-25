@@ -179,24 +179,21 @@ class Application
 private:
 	Employment* parent;
 	string user_id;
-	string work_type_;
 
 public:
-	Application(Employment* parent, const string& user_id, const string& work_type)
+	Application(Employment* parent, const string& user_id)
 	{
 		this->parent = parent;
 		this->user_id = user_id;
-		this->work_type_ = work_type;
 	}
 
 	string get_user_id() { return user_id; }
-
 	string get_employment();
 	string get_company_name();
 	string get_business_number();
 	string get_dead_line();
 	int get_max_applicants();
-	string get_work_type() { return work_type_; }
+	string get_work_type();
 };
 
 
@@ -207,9 +204,11 @@ private:
 	int total_applicants = 0;
 
 public:
-	void addApplication(Employment* parent, const string& logged_in_user_id, const string& work_type)
+	Application* addApplication(Employment* parent, const string& logged_in_user_id)
 	{
-		applications[total_applicants++] = new Application(parent, logged_in_user_id, work_type);
+		// Create new application and return it
+		applications[total_applicants] = new Application(parent, logged_in_user_id);
+		return applications[total_applicants++];
 	}
 
 	void removeApplication(string const& business_num, string const& logged_in_user_id)
@@ -317,11 +316,12 @@ public:
 		return employmentList[index];
 	}
 
-	void addEmployment(const string& companyName, const string& work_type, int max_applicants, const string& business_num, const string& deadline) {
+	Employment* addEmployment(const string& companyName, const string& work_type, int max_applicants, const string& business_num, const string& deadline) {
+		// Create new employment and return ref
 		Employment* new_employment = new Employment(companyName, work_type, max_applicants, business_num, deadline);
 
 		employmentList[numEmployments] = new_employment;
-		numEmployments++;
+		return employmentList[numEmployments++];
 	}
 
 	int getEmploymentNum() {
@@ -390,4 +390,9 @@ inline string Application::get_dead_line()
 inline int Application::get_max_applicants()
 {
 	return parent->getPeopleNumber();
+}
+
+inline string Application::get_work_type()
+{
+	return parent->getWork();
 }
