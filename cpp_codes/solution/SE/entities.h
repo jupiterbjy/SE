@@ -178,23 +178,26 @@ class EmploymentCollection;
 class Application
 {
 private:
+	Employment* parent;
 	const string user_id_;
 	string businessNum_;
 	string work_type_;
 
 public:
-	Application(const string user_id, const string businessNum, const string work_type)
-		: user_id_(user_id),
+	Application(Employment* parent, const string& user_id, const string& businessNum, const string& work_type)
+		: parent(parent),
+		user_id_(user_id),
 		businessNum_(businessNum),
 		work_type_(work_type)
 	{};
 
 	string get_user_id() { return user_id_; }
-	Employment* get_employment() { return EmploymentCollection::getEmploymentByBussinessNum(businessNum_); }
-	string get_company_name() { return EmploymentCollection::getEmploymentByBussinessNum(businessNum_)->getCompanyName(); }
-	string get_business_number() { return EmploymentCollection::getEmploymentByBussinessNum(businessNum_)->getBusinessNumber(); }
-	string get_dead_line() { return EmploymentCollection::getEmploymentByBussinessNum(businessNum_)->getDeadline(); }
-	int get_people_number() { return EmploymentCollection::getEmploymentByBussinessNum(businessNum_)->getPeopleNumber(); }
+
+	string get_employment();
+	string get_company_name();
+	string get_business_number();
+	string get_dead_line();
+	int get_people_number();
 	string get_work_type() { return work_type_; }
 };
 
@@ -213,9 +216,8 @@ public:
 
 
 	void add_application(Application* application) { // 노예지원서 추가하기
-		//if (applicationTotal >= 100) return RETURN_ERROR;  //예외처리의 흔적
+
 		applications[applicationTotal++] = application; // 지원서 합계
-		//return RETURN_OK;  //예외처리의 흔적
 	}
 
 	void cancel_application(int idx) { // 마감안했으면 지원취소 가능
@@ -226,7 +228,6 @@ public:
 			applications[i - 1] = std::move(applications[i]);
 		}
 		--applicationTotal;
-		//return RETURN_OK;  //예외처리의 흔적
 	}
 
 	//지원서 가져오기 중 필요 없는 것 찾아서 지워야 함
@@ -358,3 +359,26 @@ public:
 
 Employment* EmploymentCollection::employmentList[10] = {};
 int EmploymentCollection::numEmployments = 0;
+
+
+
+string Application::get_employment()
+{
+	return parent->getBusinessNumber();
+}
+string Application::get_company_name()
+{
+	return parent->getCompanyName();
+}
+string Application::get_business_number()
+{
+	return parent->getBusinessNumber();
+}
+string Application::get_dead_line()
+{
+	return parent->getDeadline();
+}
+int Application::get_people_number()
+{
+	return parent->getPeopleNumber();
+}
