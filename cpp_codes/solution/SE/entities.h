@@ -174,79 +174,101 @@ public:
 
 
 class Employment;
-class EmploymentCollection;
 class Application
 {
 private:
 	Employment* parent;
-	const string user_id_;
-	string businessNum_;
+	string user_id;
 	string work_type_;
 
 public:
-	Application(Employment* parent, const string& user_id, const string& businessNum, const string& work_type)
-		: parent(parent),
-		user_id_(user_id),
-		businessNum_(businessNum),
-		work_type_(work_type)
-	{};
+	Application(Employment* parent, const string& user_id, const string& work_type)
+	{
+		this->parent = parent;
+		this->user_id = user_id;
+		this->work_type_ = work_type;
+	}
 
-	string get_user_id() { return user_id_; }
+	string get_user_id() { return user_id; }
 
 	string get_employment();
 	string get_company_name();
 	string get_business_number();
 	string get_dead_line();
-	int get_people_number();
+	int get_max_applicants();
 	string get_work_type() { return work_type_; }
 };
 
 
-class ApplicationCollection {
+class ApplicationCollection
+{
 private:
-	Application* applications[100];
-	Employment* employment_;
-	int applicationTotal = 0;
+	Application* applications[100] = {nullptr,};
+	int total_applicants = 0;
 
 public:
-
-	ApplicationCollection(Employment* employment) : employment_(employment) {}
-
-	int totalCount() { return applicationTotal; } // 합계 카운터
-
-
-	void add_application(Application* application) { // 노예지원서 추가하기
-
-		applications[applicationTotal++] = application; // 지원서 합계
+	void addApplication(Employment* parent, const string& logged_in_user_id, const string& work_type)
+	{
+		applications[total_applicants++] = new Application(parent, logged_in_user_id, work_type);
 	}
 
-	void cancel_application(int idx) { // 마감안했으면 지원취소 가능
-		//if (idx >= applicationTotal) return RETURN_ERROR;  //예외처리의 흔적
-		delete applications[idx];
-		for (int i = idx + 1; i < applicationTotal; ++i)
+	void removeApplication(string const& business_num, string const& logged_in_user_id)
+	{
+		// find application
+		int target_idx = -1;
+
+		for (int idx=0; idx < total_applicants; idx++)
 		{
-			applications[i - 1] = std::move(applications[i]);
+			if (applications[idx]->get_business_number() == business_num)
+			{
+				target_idx = idx;
+				break;
+			}
 		}
-		--applicationTotal;
+
+		// (Assuming search always succeeds) delete application
+		delete applications[target_idx];
+
+		// fill in gap
+		for (int idx=target_idx; idx < --total_applicants; idx++)
+			applications[idx] = applications[idx + 1];
 	}
 
-	//지원서 가져오기 중 필요 없는 것 찾아서 지워야 함
-	Application& get_application_by_index(int idx) { //인덱스로 지원서 뽀려오기
-		return *applications[idx];
+	int total_applications_count()
+	{
+		return total_applicants;
 	}
 
-	Application* get_application_by_user_id(string user_id) { //유저아이디로 지원서 뽀려오기
-		for (Application* app : applications)
-			if (app->get_user_id() == user_id)
-				return app;
+	int getEmploymentNum() {
+		return total_applicants;
+	}
+
+	string getCompanyName(int index) {
+		return applications[index]->get_company_name();
+	}
+
+	string getDeadline(int index) {
+		return applications[index]->get_dead_line();
+	}
+
+	string getWork(int index) {
+		return applications[index]->get_work_type();
+	}
+
+	string getBusinessNumber(int index) {
+		return applications[index]->get_business_number();
+	}
+
+	Application* getEmploymentByIndex(int index)
+	{
+		return applications[index];
+	}
+
+	Application* getEmploymentByBussinessNum(string bussinessNum)
+	{
+		for (int i = 0; i < total_applicants; ++i)
+			if (applications[i]->get_business_number() == bussinessNum) return applications[i];
 		return nullptr;
-	}
-
-	int get_index_by_user_id(string user_id) { //유저아이디로 지원서 번호 가져오기
-		for (int i = 0; i < applicationTotal; ++i)
-			if (applications[i]->get_user_id() == user_id)
-				return i;
-		return -1;
 	}
 };
 
@@ -256,18 +278,17 @@ class Employment
 private:
 	string companyName;
 	string deadline;
-	string work;
-	int peopleNumber;
+	string work_type;
+	int max_applicants;
 	string businessNum;
-	ApplicationCollection* applicationCollection;
+
 public:
-	Employment(string companyName, string deadline, string work, string businessNum) {
+	Employment(const string& companyName, const string& work_type, int max_applicants, const string& business_num, const string& deadline) {
 		this->companyName = companyName;
 		this->deadline = deadline;
-		this->work = work;
-		this->peopleNumber = 0;
-		this->businessNum = businessNum;
-		this->applicationCollection = new ApplicationCollection(this);
+		this->work_type = work_type;
+		this->max_applicants = max_applicants;
+		this->businessNum = business_num;
 	}
 
 	string getCompanyName() {
@@ -277,79 +298,67 @@ public:
 		return this->deadline;
 	}
 	string getWork() {
-		return this->work;
+		return this->work_type;
 	}
 	int getPeopleNumber() {
-		return this->peopleNumber;
+		return this->max_applicants;
 	}
 	string getBusinessNumber() {
 		return this->businessNum;
 	}
-	ApplicationCollection* getApplicationCollection() {
-		return this->applicationCollection;
-	}
-	/*
-		void getEmployment();// [업무] [인원 수] [신청 마감일]
-		void getEmploymentDetails(); //<- 이제 필요없을 것 같음(삭제필)
-		void addEmployment(); //[업무] [인원 수] [신청 마감일]
-		void updateEmployment();
-		void deleteEmployment();
-		void getClosedEmployment();
-		void getClosingEmployment();
-	*/
 };
 
 class EmploymentCollection
 {
 public:
-	static Employment* employmentList[10];
-	static int numEmployments;
+	Employment* employmentList[10];
+	int numEmployments;
 	Employment* getEmployment(int index) {
 		return employmentList[index];
 	}
 
-	static void addEmployment(const string& companyName, const string& deadline, const string& work, const string bussinessNum) {
-		Employment* new_employment = new Employment(companyName, deadline, work, bussinessNum);
+	void addEmployment(const string& companyName, const string& work_type, int max_applicants, const string& business_num, const string& deadline) {
+		Employment* new_employment = new Employment(companyName, work_type, max_applicants, business_num, deadline);
 
 		employmentList[numEmployments] = new_employment;
 		numEmployments++;
 	}
 
-	static int getEmploymentNum() {
+	int getEmploymentNum() {
 		return numEmployments;
 	}
 
-	static string getCompanyName(int index) {
+	string getCompanyName(int index) {
 		return employmentList[index]->getCompanyName();
 	}
 
-	static string getDeadline(int index) {
+	string getDeadline(int index) {
 		return employmentList[index]->getDeadline();
 	}
 
-	static string getWork(int index) {
+	string getWork(int index) {
 		return employmentList[index]->getWork();
 	}
 
-	static int getPeopleNumber(int index) {
+	int getPeopleNumber(int index) {
 		return employmentList[index]->getPeopleNumber();
 	}
 
-	static string getBusinessNumber(int index) {
+	string getBusinessNumber(int index) {
 		return employmentList[index]->getBusinessNumber();
 	}
 
-	static Employment* getEmploymentByIndex(int index)
+	Employment* getEmploymentByIndex(int index)
 	{
 		return employmentList[index];
 	}
-	static Employment* getEmploymentByBussinessNum(string bussinessNum)
+	Employment* getEmploymentByBussinessNum(string bussinessNum)
 	{
 		for (int i = 0; i < numEmployments; ++i)
 			if (employmentList[i]->getBusinessNumber() == bussinessNum) return employmentList[i];
 		return nullptr;
 	}
-	static Employment* getEmploymentByName(string name)
+	Employment* getEmploymentByName(string name)
 	{
 		for (int i = 0; i < numEmployments; ++i)
 			if (employmentList[i]->getCompanyName() == name) return employmentList[i];
@@ -357,28 +366,28 @@ public:
 	}
 };
 
-Employment* EmploymentCollection::employmentList[10] = {};
-int EmploymentCollection::numEmployments = 0;
 
-
-
-string Application::get_employment()
+inline string Application::get_employment()
 {
 	return parent->getBusinessNumber();
 }
-string Application::get_company_name()
+
+inline string Application::get_company_name()
 {
 	return parent->getCompanyName();
 }
-string Application::get_business_number()
+
+inline string Application::get_business_number()
 {
 	return parent->getBusinessNumber();
 }
-string Application::get_dead_line()
+
+inline string Application::get_dead_line()
 {
 	return parent->getDeadline();
 }
-int Application::get_people_number()
+
+inline int Application::get_max_applicants()
 {
 	return parent->getPeopleNumber();
 }
