@@ -34,11 +34,14 @@ private:
 public:
 	AddCommonUserUI(const UserManager& manager) : control(manager) {}
 
-	void start_interface(string id, string pw, string name, string ssn)
+	void start_interface(ifstream& in_fp, ofstream& out_fp)
 	{
-		cout << "1.1. 회원가입" << endl;
+		string id, pw, name, ssn;
+		in_fp >> id >> pw >> name >> ssn;
+
+		out_fp << "1.1. 회원가입" << endl;
 		control.add_user(id, pw, name, ssn);
-		cout << "> " << name << " " << ssn << " " << id << " " << pw << endl;
+		out_fp << "> " << name << " " << ssn << " " << id << " " << pw << endl;
 	}
 };
 
@@ -68,11 +71,16 @@ private:
 public:
 	AddCompanyUserUI(const UserManager& manager) : control(manager) {}
 
-	void start_interface(string id, string pw, string company_name, string business_num)
+	void start_interface(ifstream& in_fp, ofstream& out_fp)
 	{
-		cout << "1.1. 회원가입" << endl;
+		// Get param from file
+		string id, pw, company_name, business_num;
+		in_fp >> id >> pw >> company_name >> business_num;
+
+		// Echo back command, run action & write string
+		out_fp << "1.1. 회원가입" << endl;
 		control.add_user(id, pw, company_name, business_num);
-		cout << "> " << company_name << " " << business_num << " " << id << " " << pw << endl;
+		out_fp << "> " << company_name << " " << business_num << " " << id << " " << pw << endl;
 	}
 };
 
@@ -120,13 +128,16 @@ private:
 public:
 	LoginUI(const UserManager& manager) : control(manager) {}
 
-	User* start_interface(const string& id, const string& pw)
+	string start_interface(ifstream& in_fp, ofstream& out_fp)
 	{
-		cout << "2.1. 로그인" << endl;
-		User* user = control.login(id, pw);
-		cout << "> " << id << " " << pw << endl;
+		string id, pw;
+		in_fp >> id >> pw;
 
-		return user;
+		out_fp << "2.1. 로그인" << endl;
+		User* user = control.login(id, pw);
+		out_fp << "> " << id << " " << pw << endl;
+
+		return user->get_id();
 	}
 };
 
@@ -159,11 +170,11 @@ private:
 public:
 	LogoutUI(const UserManager& manager) : control(manager) {}
 
-	void start_interface(const string& id)
+	void start_interface(string const& logged_in_user_id, ofstream& out_fp)
 	{
-		cout << "2.2. 로그아웃" << endl;
-		control.logout(id);
-		cout << "> " << id << endl;
+		out_fp << "2.2. 로그아웃" << endl;
+		control.logout(logged_in_user_id);
+		cout << "> " << logged_in_user_id << endl;
 	}
 };
 
@@ -176,9 +187,9 @@ public:
 		this->manager = manager;
 	}
 
-	void withdrawalUser(User* loginUser)
+	void withdrawalUser(const string& logged_in_user_id)
 	{
-		manager.delete_user_by_id(loginUser->get_id());
+		manager.delete_user_by_id(logged_in_user_id);
 	}
 };
 
@@ -190,10 +201,13 @@ private:
 public:
 	UserWithdrawalUI(const UserManager& manager) : control(manager) {}
 
-	void startInterface(User* loginUser)
+	void startInterface(string logged_in_user_id, ofstream& out_fp)
 	{
-		cout << "1.2. 회원탈퇴" << endl;
-		control.withdrawalUser(loginUser);
-		cout << "> " << loginUser->get_id() << endl;
+		// jupiterbjy: Maybe we should've design this to have super class with static var
+		// that is keeping logged in user's ID, so we can unify interfaces
+
+		out_fp << "1.2. 회원탈퇴" << endl;
+		control.withdrawalUser(logged_in_user_id);
+		out_fp << "> " << logged_in_user_id << endl;
 	}
 };

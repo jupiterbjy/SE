@@ -4,40 +4,6 @@
 #include <string>
 #include "entities.h"
 
-class ApplicationCollection {
-private:
-    Application* applications[100];
-    int applicationTotal = 0;
-    
-    int* businessNum[100];
-    
-public:
-    int total_count() { return total; } // 합계 카운터
-    
-    bool checkBusinessNum(int businessNum) { //입력한 사업자번호와 지원완료한 회사의 사업자번호 비교 (True -> cancelApplication();)
-        for (int idx = 0; idx < total; idx++)
-            if (application[idx] == businessNum)
-                return true;
-        
-        return false;
-    }
-
-    void add_application(Application application) { // 노예지원서 추가하기
-        applications[applicationTotal++] = applications; // 지원서 합계
-    }
-    
-    void cancelApplication(int idx) { // 마감안했으면 지원취소 가능
-        aapplication[total--] = application;
-    }
-    
-    Application get_application_by_index(int idx) { //인덱스로 지원서 뽀려오기
-        return applications[idx];
-    }
-    
-    Application getBusinessNum(int businessNum){ //사업자번호 받아오기
-        return businessNum;
-    }
-};
 
 //Controll Class
 class NowApplication { // 사업자번호 -> 회사이름, 사업자번호, 업무
@@ -51,7 +17,7 @@ public:
 };
 
 //Boundary Class
-class NowApplicationUI {
+class NewApplicationUI {
 private:
     nowApplication control;
     

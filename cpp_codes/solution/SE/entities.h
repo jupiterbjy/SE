@@ -1,13 +1,13 @@
 #pragma once
 
-#include<string>
+#include <string>
 #include <utility>
 
-// Unifying style to Google's C++ style For now
-// maybe excluding class name, class name using snake-case doesn't feel right
-// Written with support of Code inspection by ReSharper C++
+// Unified with Google's C++ C++ Code style excluding class name.
+// Written with ReSharper C++ code re-formatter
 
 using namespace std;
+
 
 class User
 {
@@ -25,7 +25,6 @@ public:
 	string get_id() { return id_; }
 	bool is_pwd_valid(const string& password) const { return password == pw_; }
 };
-
 
 
 class CompanyUser : public User
@@ -133,29 +132,29 @@ public:
 		company_collection_.add_user(new_user);
 	}
 
-	CompanyUser* get_company_user(const string& id)
+	CompanyUser* get_company_user(const string& id) const
 	{
 		// Downcast to CompanyUser
-		User user = *company_collection_.get_user_by_id(id);
-		CompanyUser* company_user = (CompanyUser*)&user;
+		User* user = company_collection_.get_user_by_id(id);
+		auto* company_user = reinterpret_cast<CompanyUser*>(&user);
 		return company_user;
 	}
 
-	CommonUser* get_common_user(const string& id)
+	CommonUser* get_common_user(const string& id) const
 	{
 		// Downcast to CommonUser
-		User user = *common_collection_.get_user_by_id(id);
-		CommonUser* common_user = (CommonUser*)&user;
+		User* user = common_collection_.get_user_by_id(id);
+		auto* common_user = reinterpret_cast<CommonUser*>(&user);
 		return common_user;
 	}
 
-	bool is_user_company(const string& id)
+	bool is_user_company(const string& id) const
 	{
 		// Check if user is company user
 		return company_collection_.does_user_exist(id);
 	}
 
-	bool is_user_common(const string& id)
+	bool is_user_common(const string& id) const
 	{
 		// Check if user is company user
 		// Now I think we'd better off adding company/common flag in user...
@@ -170,5 +169,146 @@ public:
 		else
 			// Otherwise delete in other collection
 			common_collection_.del_user(id);
+	}
+};
+
+
+class Employment
+{
+private:
+	string companyName;
+	string deadline;
+	string work;
+	int peopleNumber;
+public:
+	Employment(string companyName, string deadline, string work) {
+		this->companyName = companyName;
+		this->deadline = deadline;
+		this->work = work;
+		this->peopleNumber = 0;
+	}
+
+	string getCompanyName() {
+		return this->companyName;
+	}
+	string getDeadline() {
+		return this->deadline;
+	}
+	string getWork() {
+		return this->work;
+	}
+	int getPeopleNumber() {
+		return this->peopleNumber;
+	}
+	/*
+		void getEmployment();// [업무] [인원 수] [신청 마감일]
+		void getEmploymentDetails(); //<- 이제 필요없을 것 같음(삭제필)
+		void addEmployment(); //[업무] [인원 수] [신청 마감일]
+		void updateEmployment();
+		void deleteEmployment();
+		void getClosedEmployment();
+		void getClosingEmployment();
+	*/
+};
+
+class EmploymentCollection
+{
+public:
+	static Employment* employmentList[10];
+	static int numEmployments;
+	Employment* getEmployment(int index) {
+		return employmentList[index];
+	}
+
+	static void addEmployment(const string& companyName, const string& deadline, const string& work) {
+		Employment new_employment = Employment(companyName, deadline, work);
+
+		employmentList[numEmployments] = &new_employment;
+		numEmployments++;
+	}
+
+	static int getEmploymentNum() {
+		return numEmployments;
+	}
+
+	static string getCompanyName(int index) {
+		return employmentList[index]->getCompanyName();
+	}
+
+	static string getDeadline(int index) {
+		return employmentList[index]->getDeadline();
+	}
+
+	static string getWork(int index) {
+		return employmentList[index]->getWork();
+	}
+
+	static int getPeopleNumber(int index) {
+		return employmentList[index]->getPeopleNumber();
+	}
+};
+
+Employment* EmploymentCollection::employmentList[10] = {};
+int EmploymentCollection::numEmployments = 0;
+
+
+
+class Application
+{
+private:
+	string user_id_;
+	string business_num_;
+	string work_type_;
+	int max_applicants_;
+	string closing_date_;
+
+public:
+	Application(string user_id, string business_num, string work_type, const int max_applicants, string closing_date)
+	{
+		this->user_id_ = std::move(user_id);
+		this->business_num_ = std::move(business_num);
+		this->work_type_ = std::move(work_type);
+		this->max_applicants_ = max_applicants;
+		this->closing_date_ = std::move(closing_date);
+	}
+
+	string get_user_id() { return user_id_; }
+	string get_business_id() { return business_num_; }
+	string get_work_type() { return work_type_; }
+	int get_max_applicants() const { return max_applicants_; }
+	string get_closing_date() { return closing_date_; }
+};
+
+
+class ApplicationCollection {
+private:
+	Application* applications[100];
+	int applicationTotal = 0;
+
+public:
+	int total_count() { return total; } // 합계 카운터
+
+	bool checkBusinessNum(int businessNum) { //입력한 사업자번호와 지원완료한 회사의 사업자번호 비교 (True -> cancelApplication();)
+		for (int idx = 0; idx < total; idx++)
+			if (application[idx] == businessNum)
+				return true;
+
+		return false;
+	}
+
+	void add_application(Application application) { // 노예지원서 추가하기
+		applications[applicationTotal++] = applications; // 지원서 합계
+	}
+
+	void cancelApplication(int idx) { // 마감안했으면 지원취소 가능
+		aapplication[total--] = application;
+	}
+
+	Application get_application_by_index(int idx) { //인덱스로 지원서 뽀려오기
+		return applications[idx];
+	}
+
+	Application getBusinessNum(int businessNum) { //사업자번호 받아오기
+		return businessNum;
 	}
 };

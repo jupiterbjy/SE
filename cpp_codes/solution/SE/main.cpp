@@ -1,64 +1,114 @@
-#include "employmentEntities.h"
+#include <fstream>
 
+#include "employment_management_system.h"
+#include "application.h"
+#include "statistics_output_system.h"
+#include "user_management_system.h"
 
 
 // 상수 선언
 #define MAX_STRING 32
+#define INPUT_FILE_NAME "input.txt"
+#define OUTPUT_FILE_NAME "output.txt"
+
+typedef enum
+{
+	NOT_LOGGED_IN,
+    COMPANY_USER,
+    COMMON_USER
+
+} LoginState;
 
 
 // 함수 선언
-void doTask();
-//void join();
-//void withdrawal(User* loginUser);
-//void statics_output(User *loginUser, int loginUserType);
-//void program_exit();
-void aaddEmployment();
-void sshowEmploymentList();
-void ccompanyNameSerch();
+void doTask(const ifstream& in_fp, ofstream& out_fp);
+void program_exit();
 
-// 변수 선언
-FILE* in_fp, *out_fp;
 
 int main() 
 {
-    FILE* in_fp = fopen(INPUT_FILE_NAME, "r+"); 
-    FILE* out_fp = fopen(OUTPUT_FILE_NAME, "w+");
-    // 파일 입출력을 위한 초기화
-    doTask();
-    //fclose(in_fp);
-    //fclose(out_fp);
+    // prep file
+    ifstream in_fp;
+    ofstream out_fp;
+
+    // open file
+    in_fp.open(INPUT_FILE_NAME, ios_base::in);
+    out_fp.open(OUTPUT_FILE_NAME, ios_base::out);
+
+    doTask(in_fp, out_fp);
+
+    // close file
+    in_fp.close();
+    out_fp.close();
+
     return 0; 
 }
 
-void doTask() 
+void doTask(ifstream& in_fp, ofstream& out_fp) 
 {
     // 메뉴 파싱을 위한 level 구분을 위한 변수 
-    int menu_level_1 = 0, menu_level_2 = 0; 
-    int is_program_exit = 0;
-    //User* loginUser;
-    //int loginUserType = 0; // 0: 로그인 회원 없음 1: 회사 회원, 2: 일반 회원
-    while(!is_program_exit) 
+    int menu_level_1, menu_level_2, menu_level_3;
+    bool is_running = true;
+
+    // Instantiate collections
+    UserManager user_manager;
+    EmploymentCollection employment_collection;
+    ApplicationCollection application_collection;
+
+    // Instantiate controls & boundaries
+    // User management system
+    AddCompanyUserUI add_company_ui(user_manager);
+    AddCommonUserUI add_common_ui(user_manager);
+    LoginUI login_ui(user_manager);
+    LogoutUI logout_ui(user_manager);
+    UserWithdrawalUI user_withdrawal_ui(user_manager);
+
+    // Employment Management system
+    EmploymentAddUI employment_add_ui;
+    ShowEmploymentListUI employment_list_ui;
+
+    // statistics system
+    ApplicationStatUI application_stat_ui(application_collection);
+    EmploymentStatUI employment_stat_ui(employment_collection);
+
+    // Application Management system
+    NewApplicationUI apply_now_ui;
+    CancelApplicationUI application_cancel_ui(application_collection);
+    ApplicationCheckUI application_check_ui(application_collection);
+    CompanyNameSearchUI company_search_ui(application_collection);
+
+
+    // Keep logged in user's info - default is empty, so safe to init like this
+	string logged_in_user_id;
+    LoginState state = NOT_LOGGED_IN;
+
+    // Run code
+    while(is_running) 
     {
-        cout << "doTask is running" << endl;
+        // cout << "[DEBUG] doTask is running" << endl;
         // 입력파일에서 메뉴 숫자 2개를 읽기
-        fscanf(in_fp, "%d %d", &menu_level_1, &menu_level_2);
-        cout << "Open File is running" << endl;
-        // 메뉴 구분 및 해당 연산 수행 
+        in_fp >> menu_level_1 >> menu_level_2;
+        
+        // Switching Start
         switch(menu_level_1)
         {
             case 1: 
             {
                 switch(menu_level_2) 
                 {
-                    case 1: // "1.1. 회원가입“ 메뉴 부분 
+                    case 1: // 1.1.1. / 1.1.2. 회원가입
                     {
-                        // join() 함수에서 해당 기능 수행 
-                        //join();
+                        in_fp >> menu_level_3;
+                        if (menu_level_3 == 0)
+                            add_company_ui.start_interface(in_fp, out_fp);
+                        else
+                            add_common_ui.start_interface(in_fp, out_fp);
+                        
                         break; 
                     }
-                    case 2: // "1.2. 회원탈퇴" 메뉴 부분
+                    case 2: // 1.2. 회원탈퇴
                     {
-                        //withdrawal(loginUser);
+                        user_withdrawal_ui.startInterface(logged_in_user_id, out_fp);
                         break; 
                     }
                 }
@@ -67,12 +117,19 @@ void doTask()
             {
                 switch(menu_level_2) 
                 {
-                    case 1:
+                    case 1: // 2.1. Login
                     {
+                        logged_in_user_id = login_ui.start_interface(in_fp, out_fp);
                         break;
                     }
-                    case 2:
+                    case 2: // 2.2. Logout
                     {
+                        // Just in case, check if empty
+                        if (logged_in_user_id.empty())
+                            break;
+
+                        logout_ui.start_interface(logged_in_user_id, out_fp);
+                        logged_in_user_id = "";
                         break;
                     }
                 }
@@ -81,16 +138,14 @@ void doTask()
             {
                 switch(menu_level_2)
                 {
-                    case 1: // "3.1. 채용 정보 등록"
+                    case 1: // 3.1. 채용 정보 등록
                     {
-                        aaddEmployment();
-                        cout << "3.1 Now Running" << endl;
+                        employment_add_ui.start_interface(in_fp, out_fp);
                         break;
                     }
-                    case 2:
+                    case 2: // 3.2. 등록된 채용 정보 조회
                     {
-                        sshowEmploymentList();
-                        cout << "3.2 Now Running" << endl;
+                        employment_list_ui.start_interface(logged_in_user_id, out_fp);
                         break;
                     }
                 }
@@ -99,22 +154,24 @@ void doTask()
             {
                 switch(menu_level_2)
                 {
-                    case 1:
+                    case 1: // 4.1. 채용 정보 검색
                     {
-                        ccompanyNameSerch();
-                        cout << "4.1 Now Running" << endl;
+                        company_search_ui.startInterface(in_fp, out_fp);
                         break;
                     }
-                    case 2:
+                    case 2: // 4.2. 채용 지원
                     {
+                        apply_now_ui.startInterface(logged_in_user_id, in_fp, out_fp);
                         break;
                     }
-                    case 3:
+                    case 3: // 4.3. 지원 정보 조회
                     {
+                        application_check_ui.startInterface(logged_in_user_id, out_fp);
                         break;
                     }
-                    case 4:
+                    case 4: // 4.4. 지원 취소
                     {
+                        application_cancel_ui.startInterface(logged_in_user_id, in_fp, out_fp);
                         break;
                     }
                 }
@@ -123,21 +180,22 @@ void doTask()
             {
                 switch(menu_level_2)
                 {
-                    case 1:
+                    case 1: // "5.1. 지원 정보 통계"
                     {
-                        //statics_output(loginUser, loginUserType);   // "5.1. 지원 정보 통계"
+                        
+                        employment_stat_ui.startInterface(logged_in_user_id, out_fp);
                         break;
                     }
                 }
             }
-            case 7: 
+            case 6: 
             {
                 switch(menu_level_2) 
                 {
-                    case 1: // "6.1. 종료“ 메뉴 부gi분 
+                    case 1: // "6.1. 종료" 메뉴 부분 
                     {
-                        //program_exit(); 
-                        //is_program_exit = 1; 
+                        program_exit(); 
+                        is_running = false; 
                         break;
                     }
                 }
@@ -147,18 +205,8 @@ void doTask()
     return;
 }
 
-void aaddEmployment() {
-    EmploymentAdd employmentAdd;
-    employmentAdd.addEmployment();
-}
 
-void sshowEmploymentList() {
-   ShowEmploymentList showEmploymentList;
-   showEmploymentList.showEmploymentInfo();
-}
-
-void ccompanyNameSerch(){
-    
-    CompanyNameSearch companyNameSearch;
-    companyNameSearch.searchCompanyName();
+void program_exit()
+{
+    cout << "6.1. 종료" << endl;
 }
