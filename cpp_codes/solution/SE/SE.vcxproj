@@ -28,9 +28,6 @@
     <ClInclude Include="statistics_output_system.h" />
     <ClInclude Include="user_management_system.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
